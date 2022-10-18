@@ -1,15 +1,15 @@
 import type { AppProps } from 'next/app';
 
-import { ThemeProvider } from 'styled-components';
-import GlobalStyle from '../styles/global';
-import theme from '../styles/theme';
+import '../styles/global.scss';
+
+import 'antd/dist/antd.css';
+import { AuthProvider } from '../contexts/AuthContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyle />
+    <AuthProvider>
       <Component {...pageProps} />
-    </ThemeProvider>
+    </AuthProvider>
   );
 }
 
