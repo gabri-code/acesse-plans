@@ -1,6 +1,6 @@
 import { getApiClient } from './axios';
-import { signInRequest, getMe } from './User';
+import { signInRequest, getMe, signOutRequest } from './User';
 
 export const client = getApiClient();
 
-export { signInRequest, getMe };
+export { signInRequest, getMe, signOutRequest };

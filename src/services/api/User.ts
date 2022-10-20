@@ -20,10 +20,22 @@ export const signInRequest = async (data: UserLogin) => {
   }
 };
 
+export const signOutRequest = async (id: string) => {
+  try {
+    const response = await client.post<MainResponse>('/signout', { id });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      axios.isAxiosError(error)
+        ? error?.response?.data?.error?.message
+        : 'Um erro inesperado aconteceu.'
+    );
+  }
+};
+
 export const getMe = async () => {
   try {
     const response = await client.get<UserResponse>('/user/me');
-    console.log(response);
     return response.data;
   } catch (error) {
     return axios.isAxiosError(error)

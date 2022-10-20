@@ -16,5 +16,5 @@ export const requireAuthentication = (
     };
   }
 
-  return callback({ token });
+  return callback();
 };

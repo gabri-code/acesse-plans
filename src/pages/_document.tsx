@@ -1,6 +1,5 @@
 import React from 'react';
 import Document, {
-  DocumentInitialProps,
   DocumentContext,
   Html,
   Head,
@@ -10,9 +9,7 @@ import Document, {
 import { ServerStyleSheet } from 'styled-components';
 
 export default class MyDocument extends Document {
-  static async getInitialProps(
-    ctx: DocumentContext
-  ): Promise<DocumentInitialProps> {
+  static async getInitialProps(ctx: DocumentContext) {
     const sheet = new ServerStyleSheet();
     const originalRenderPage = ctx.renderPage;
 
@@ -45,35 +42,35 @@ export default class MyDocument extends Document {
           <meta charSet="utf-8" />
           <link
             rel="preload"
-            href="/fonts/Poppins-Light.ttf"
+            href="/fonts/Gilroy-Light.ttf"
             as="font"
             type="font/truetype"
             crossOrigin=""
           />
           <link
             rel="preload"
-            href="/fonts/Poppins-Regular.ttf"
+            href="/fonts/Gilroy-Regular.ttf"
             as="font"
             type="font/truetype"
             crossOrigin=""
           />
           <link
             rel="preload"
-            href="/fonts/Poppins-Medium.ttf"
+            href="/fonts/Gilroy-Medium.ttf"
             as="font"
             type="font/truetype"
             crossOrigin=""
           />
           <link
             rel="preload"
-            href="/fonts/Poppins-SemiBold.ttf"
+            href="/fonts/Gilroy-SemiBold.ttf"
             as="font"
             type="font/truetype"
             crossOrigin=""
           />
           <link
             rel="preload"
-            href="/fonts/Poppins-Bold.ttf"
+            href="/fonts/Gilroy-Bold.ttf"
             as="font"
             type="font/truetype"
             crossOrigin=""

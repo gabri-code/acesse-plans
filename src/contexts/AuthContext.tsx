@@ -1,12 +1,13 @@
-import { createContext, FC, ReactNode, useEffect, useState } from 'react';
-import { setCookie, parseCookies } from 'nookies';
-import { getMe, signInRequest } from '../services/api/User';
+import { createContext, FC, ReactNode, useState } from 'react';
+import { setCookie, destroyCookie } from 'nookies';
+import { signInRequest, signOutRequest } from '../services/api/User';
 import { IError, UserLogin, UserResponse } from '../types';
 import Router from 'next/router';
 
 type AuthContextType = {
   isAuthenticated: boolean;
   signIn: (data: UserLogin) => Promise<void | IError>;
+  signOut: (id: string) => Promise<void | IError>;
   user: UserResponse | null;
 };
 
@@ -21,13 +22,13 @@ export const AuthProvider: FC<AuthProviderType> = ({ children }) => {
 
   const isAuthenticated = !!user;
 
-  useEffect(() => {
-    const { 'acesse-token': token } = parseCookies();
+  // useEffect(() => {
+  //   const { 'acesse-token': token } = parseCookies();
 
-    if (token) {
-      getMe(token).then((user) => setUser(user));
-    }
-  }, []);
+  //   if (token) {
+  //     getMe(token).then((user) => setUser(user));
+  //   }
+  // }, []);
 
   const signIn = async ({ email, password }: UserLogin) => {
     try {
@@ -49,8 +50,18 @@ export const AuthProvider: FC<AuthProviderType> = ({ children }) => {
     }
   };
 
+  const signOut = async (id: string) => {
+    try {
+      await signOutRequest(id);
+      destroyCookie(undefined, 'acesse-token');
+      Router.push('/signin');
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signIn, user }}>
+    <AuthContext.Provider value={{ isAuthenticated, signIn, user, signOut }}>
       {children}
     </AuthContext.Provider>
   );

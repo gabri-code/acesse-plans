@@ -1,7 +1,7 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Image, Input, Typography } from 'antd';
 import Head from 'next/head';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 
 import styles from '../../styles/SignIn.module.scss';
@@ -11,14 +11,16 @@ const { Link } = Typography;
 
 const SignInPage = () => {
   const { signIn } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
 
   const [form] = Form.useForm();
 
   const onFinish = async (values: UserLogin) => {
     console.log('Success:', values);
+    setLoading(true);
     const response = await signIn(values);
 
-    console.log(!!response);
+    setLoading(false);
 
     if (!!response) {
       form.setFields([
@@ -76,7 +78,7 @@ const SignInPage = () => {
                 placeholder="joão@acesse.com.br"
                 prefix={<UserOutlined />}
                 autoCapitalize="none"
-                autoComplete="off"
+                autoComplete="new-password"
                 size="large"
                 bordered={false}
                 className={styles.input}
@@ -94,7 +96,7 @@ const SignInPage = () => {
             >
               <Input.Password
                 placeholder="********"
-                autoComplete="password"
+                autoComplete="false"
                 prefix={<LockOutlined />}
                 bordered={false}
               />
@@ -107,6 +109,7 @@ const SignInPage = () => {
                 type="primary"
                 htmlType="submit"
                 className={styles['button-submit']}
+                loading={loading}
               >
                 Entrar
               </Button>
