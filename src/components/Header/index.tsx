@@ -1,25 +1,23 @@
 import { BellOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Avatar, Button, Dropdown, Menu } from 'antd';
 import { FC, useContext } from 'react';
-import { AuthContext } from '../../contexts/AuthContext';
-import { UserResponse } from '../../types';
 import {
   StyledBadgeNotification,
   StyledBadgeUser,
   StyledHeader,
   StyledPageTitle,
 } from './style';
+import { AuthContext } from '../../contexts/AuthContext';
 
 interface HProps {
-  user: UserResponse;
   title: string;
 }
 
-const Header: FC<HProps> = ({ user, title }) => {
-  const { signOut } = useContext(AuthContext);
+const Header: FC<HProps> = ({ title }) => {
+  const { signOut, user } = useContext(AuthContext);
 
   const handleSignOut = async () => {
-    await signOut(user.id);
+    if (user) await signOut(user.id);
   };
 
   const userMenu = (
@@ -51,11 +49,7 @@ const Header: FC<HProps> = ({ user, title }) => {
         <Dropdown overlay={userMenu} trigger={['click']}>
           <StyledBadgeUser>
             <Button shape="circle">
-              <Avatar
-                shape="circle"
-                size={30}
-                src="https://blog.unyleya.edu.br/wp-content/uploads/2017/12/saiba-como-a-educacao-ajuda-voce-a-ser-uma-pessoa-melhor.jpeg"
-              />
+              <Avatar shape="circle" size={30} src={user?.picture} />
             </Button>
           </StyledBadgeUser>
         </Dropdown>

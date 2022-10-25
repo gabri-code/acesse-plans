@@ -1,119 +1,13 @@
 .signin-page {
   width: 100%;
-  height: 100vh;
+  padding: 15px;
+  min-height: 100vh !important;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9)),
     url('/images/login-background.webp');
   background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  .form-wraper {
-    width: 500px;
-    min-width: 340px;
-    border-radius: 10px;
-    overflow: hidden;
-    padding: 55px 55px 37px 55px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    background: rgba(255, 255, 255, 0.35);
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-
-    .logo {
-      width: 200px;
-      margin-bottom: 30px;
-    }
-
-    .forgot-link {
-      color: #000;
-      align-self: flex-end;
-      margin-bottom: 20px;
-    }
-
-    .first-access {
-      color: #000;
-      align-self: center;
-    }
-
-    .form-login {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-
-      .wrap-input {
-        width: 100%;
-        position: relative;
-        border: none;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.24);
-        margin-bottom: 30px;
-        background: transparent;
-
-        span {
-          background: transparent;
-          border: none;
-        }
-
-        label {
-          color: #fff;
-        }
-
-        input {
-          font-size: 16px;
-          color: #fff;
-          line-height: 1.2;
-
-          display: block;
-          width: 100%;
-          height: 45px;
-          background: transparent;
-          padding: 0 5px 0 38px;
-          outline: none;
-          border: none;
-        }
-
-        input:-webkit-autofill {
-          -webkit-box-shadow: 0 0 0px 1000px rgb(255, 255, 255) inset;
-        }
-
-        input:-webkit-autofill:focus {
-          -webkit-box-shadow: 0 0 0 50px white inset;
-          -webkit-text-fill-color: #333;
-        }
-      }
-
-      .form-btn-container {
-        width: 100%;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -moz-box;
-        display: -ms-flexbox;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-
-        .button-submit {
-          font-size: 16px;
-          color: #fff;
-          line-height: 1.2;
-
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -moz-box;
-          display: -ms-flexbox;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 0 20px;
-          min-width: 120px;
-          height: 50px;
-          border-radius: 25px;
-          background: #f26716;
-          border: none;
-        }
-      }
-    }
-  }
+  // overflow: hidden;
+  overflow-y: auto;
 }

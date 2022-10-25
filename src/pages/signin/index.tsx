@@ -1,35 +1,70 @@
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Image, Input, Typography } from 'antd';
+import { gql, useLazyQuery, useMutation } from '@apollo/client';
+import { Image, Typography } from 'antd';
+import { Formik, FormikHandlers, FormikHelpers } from 'formik';
 import Head from 'next/head';
 import { useContext, useState } from 'react';
+import * as yup from 'yup';
+import FormLogin from '../../components/FormLogin';
 import { AuthContext } from '../../contexts/AuthContext';
+import { USER_BY_EMAIL_QUERY } from '../../graphql/queries/user/getByEmail';
 
 import styles from '../../styles/SignIn.module.scss';
 import { UserLogin } from '../../types';
 
 const { Link } = Typography;
 
+interface FormValues {
+  email: string;
+  password: string;
+}
+
+const initialValues: FormValues = {
+  email: '',
+  password: '',
+};
+
 const SignInPage = () => {
   const { signIn } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
+  const [getUser] = useLazyQuery(USER_BY_EMAIL_QUERY);
 
-  const [form] = Form.useForm();
+  const LoginSchema = yup.object().shape({
+    email: yup
+      .string()
+      .email('Por favor, insira um email válido.')
+      .required('Por favor, insira um email.')
+      .test({
+        name: 'userByEmail',
+        exclusive: true,
+        message: 'E-mail ou senha inválidos.',
+        test: async (value) => {
+          try {
+            const { data } = await getUser({
+              variables: {
+                email: value,
+              },
+            });
+            return !!data;
+          } catch (e) {
+            return false;
+          }
+        },
+      }),
+    password: yup.string().required('Por favor, insira sua senha.'),
+  });
 
-  const onFinish = async (values: UserLogin) => {
-    console.log('Success:', values);
+  const onSubmit = async (
+    values: UserLogin,
+    { setErrors }: FormikHelpers<FormValues>
+  ) => {
     setLoading(true);
     const response = await signIn(values);
 
-    setLoading(false);
-
-    if (!!response) {
-      form.setFields([
-        {
-          name: 'email',
-          errors: [response.error],
-        },
-      ]);
+    if (response) {
+      setErrors({ email: response.message });
     }
+
+    setLoading(false);
   };
 
   return (
@@ -40,85 +75,16 @@ const SignInPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={styles['signin-page']}>
-        <div className={styles['form-wraper']}>
-          <Image
-            src="/images/logo.png"
-            alt="logo"
-            className={styles.logo}
-            preview={false}
-          />
-          <Form
-            name="loginForm"
-            layout="vertical"
-            form={form}
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 16 }}
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-            autoComplete="off"
-            className={styles['form-login']}
-          >
-            <Form.Item
-              label="E-mail"
-              name="email"
-              rules={[
-                {
-                  required: true,
-                  message: 'Por favor, insira seu e-mail.',
-                },
-                {
-                  type: 'email',
-                  message: 'Por favor, insira um e-mail válido.',
-                },
-              ]}
-              className={styles['wrap-input']}
-              wrapperCol={{ sm: 24 }}
-            >
-              <Input
-                placeholder="joão@acesse.com.br"
-                prefix={<UserOutlined />}
-                autoCapitalize="none"
-                autoComplete="new-password"
-                size="large"
-                bordered={false}
-                className={styles.input}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Senha"
-              name="password"
-              rules={[
-                { required: true, message: 'Por favor, insira sua senha!' },
-              ]}
-              wrapperCol={{ sm: 24 }}
-              className={styles['wrap-input']}
-            >
-              <Input.Password
-                placeholder="********"
-                autoComplete="false"
-                prefix={<LockOutlined />}
-                bordered={false}
-              />
-            </Form.Item>
-            <Link href="#" className={styles['forgot-link']}>
-              Esqueci minha senha
-            </Link>
-            <Form.Item className={styles['form-btn-container']}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                className={styles['button-submit']}
-                loading={loading}
-              >
-                Entrar
-              </Button>
-            </Form.Item>
-            <Link href="#" className={styles['first-access']}>
-              Meu primeiro acesso
-            </Link>
-          </Form>
-        </div>
+        <Formik
+          initialValues={initialValues}
+          onSubmit={onSubmit}
+          validationSchema={LoginSchema}
+          validateOnMount={false}
+        >
+          {({ errors }) => {
+            return <FormLogin errors={errors} loading={loading} />;
+          }}
+        </Formik>
       </div>
     </>
   );

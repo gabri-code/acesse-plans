@@ -1,14 +1,26 @@
-import { createContext, FC, ReactNode, useState } from 'react';
+import {
+  createContext,
+  Dispatch,
+  FC,
+  ReactNode,
+  SetStateAction,
+  useState,
+} from 'react';
 import { setCookie, destroyCookie } from 'nookies';
-import { signInRequest, signOutRequest } from '../services/api/User';
-import { IError, UserLogin, UserResponse } from '../types';
 import Router from 'next/router';
+import { useMutation } from '@apollo/client';
+import { UserLogin, UserResponse } from '../types';
+import { SIGNIN_MUTATION } from '../graphql/mutations/user/signin';
+import { SIGNOUT_MUTATION } from '../graphql/mutations/user/signout';
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  signIn: (data: UserLogin) => Promise<void | IError>;
-  signOut: (id: string) => Promise<void | IError>;
+  signIn: (data: UserLogin) => Promise<void | { message: string }>;
+  signOut: (id: string) => Promise<void | { message: string }>;
   user: UserResponse | null;
+  setUser: Dispatch<SetStateAction<UserResponse | null>>;
+  isLoading: boolean;
+  setPageLoading: (value: boolean) => void;
 };
 
 type AuthProviderType = {
@@ -19,40 +31,39 @@ export const AuthContext = createContext({} as AuthContextType);
 
 export const AuthProvider: FC<AuthProviderType> = ({ children }) => {
   const [user, setUser] = useState<UserResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [signInRequest] = useMutation(SIGNIN_MUTATION);
+  const [signOutRequest] = useMutation(SIGNOUT_MUTATION);
 
   const isAuthenticated = !!user;
 
-  // useEffect(() => {
-  //   const { 'acesse-token': token } = parseCookies();
-
-  //   if (token) {
-  //     getMe(token).then((user) => setUser(user));
-  //   }
-  // }, []);
+  const setPageLoading = (value: boolean) => setIsLoading(value);
 
   const signIn = async ({ email, password }: UserLogin) => {
     try {
-      const { token, user } = await signInRequest({ email, password });
+      const {
+        data: {
+          signIn: { token },
+        },
+      } = await signInRequest({ variables: { data: { email, password } } });
 
       setCookie(undefined, 'acesse-token', token, {
         maxAge: 60 * 60 * 8, // 8 horas
       });
 
-      setUser(user);
-
       Router.push('/');
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       return {
-        error: error.message,
+        message: error.message,
       };
     }
   };
 
   const signOut = async (id: string) => {
     try {
-      await signOutRequest(id);
+      console.log(id);
+      await signOutRequest({ variables: { id } });
       destroyCookie(undefined, 'acesse-token');
       Router.push('/signin');
     } catch (e) {
@@ -61,7 +72,17 @@ export const AuthProvider: FC<AuthProviderType> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signIn, user, signOut }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        signIn,
+        user,
+        signOut,
+        setUser,
+        isLoading,
+        setPageLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

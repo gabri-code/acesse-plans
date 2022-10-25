@@ -12,6 +12,7 @@ const { Sider } = StyledLayout;
 
 export const StyledSider = styled(Sider)`
   min-width: 126px !important;
+  height: 100vh !important;
 `;
 
 export const StyledLogo = styled(LogoAcesse)`
@@ -23,6 +24,8 @@ export const StyledLogo = styled(LogoAcesse)`
 export const StyledLayoutContent = styled(Layout)`
   background: #efefef;
   padding: 28px 15px 0px 22px;
+  overflow: hidden;
+  overflow-y: scroll;
 `;
 
 export const StyledSiderMenu = styled(Menu)`

@@ -4,15 +4,28 @@ import 'antd/dist/antd.css';
 
 // import '../styles/global.scss';
 
+import { ApolloProvider } from '@apollo/client';
 import { AuthProvider } from '../contexts/AuthContext';
 import { GlobalStyle } from '../styles/globalStyle';
+import PageLoader from '../components/PageLoader';
+import createApolloClient from '../graphql/client';
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const protectedRoutes = [
+    '/',
+    '/gerenciamento-usuarios',
+    '/gerenciamento-clientes',
+  ];
+
   return (
-    <AuthProvider>
-      <GlobalStyle />
-      <Component {...pageProps} />
-    </AuthProvider>
+    <ApolloProvider client={createApolloClient()}>
+      <AuthProvider>
+        <GlobalStyle />
+        <PageLoader>
+          <Component {...pageProps} />
+        </PageLoader>
+      </AuthProvider>
+    </ApolloProvider>
   );
 }
 
