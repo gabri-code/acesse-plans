@@ -11,7 +11,7 @@ export const GET_ALL_USERS_QUERY = gql`
       fullName
       phone
       picture
-      role
+      roles
       updatedAt
       id
     }

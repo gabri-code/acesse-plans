@@ -12,7 +12,7 @@ export const InputLabel = styled(Text)`
   color: #fff;
 `;
 
-export const StyledField = styled(Field)`
+export const StyledField = styled(Field)<{ transparent: boolean }>`
   font-size: 16px;
   color: #fff;
   line-height: 1.2;
@@ -20,7 +20,7 @@ export const StyledField = styled(Field)`
   display: block;
   width: 100% !important;
   height: 45px;
-  background: transparent;
+  background: ${({ transparent }) => (transparent ? 'transparent' : '#fff')};
   padding: 0 5px 0 38px;
   outline: none;
   border: none;
@@ -39,12 +39,16 @@ export const StyledField = styled(Field)`
   }
 `;
 
-export const WrapInput = styled(Layout)`
+export const WrapInput = styled(Layout)<{
+  transparent?: boolean;
+  bordered?: boolean;
+}>`
   width: 100%;
+  height: 100%;
   position: relative;
-  border: none;
+  border: ${({ bordered }) => (!bordered ? 'none' : '1px solid gray')};
   border-bottom: 2px solid rgba(255, 255, 255, 0.24);
-  background: transparent;
+  background: ${({ transparent }) => (transparent ? 'transparent' : '#fff')};
   flex-direction: row;
   align-items: center;
 

@@ -33,12 +33,33 @@ export interface UserResponse {
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
-  role: Role[];
+  roles: Role[];
   customers: CustomerModel[];
   commissions: number;
+}
+
+export interface PreUserResponse {
+  id: string;
+  email: string;
+  roles: Role[];
 }
 
 export type MainResponse = {
   user: UserResponse;
   token: string;
+};
+
+export type UserRegister = {
+  fullName: string;
+  email: string;
+  birthDay: Date;
+  cpf: string;
+  password: string;
+  phone: string;
+  address: string;
+  picture: string;
+  roles: Role[];
+  // bank: string;
+  // bankAccount: string;
+  // bankAgency: string;
 };

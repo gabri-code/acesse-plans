@@ -1,16 +1,23 @@
-import { Badge, Button } from 'antd';
+import { Badge, BadgeProps, Button, Layout, Space, Typography } from 'antd';
 import styled from 'styled-components';
 
 export const NewUserButton = styled(Button)`
   align-self: flex-start;
+  margin-bottom: 30px;
 `;
 
-type UserAvatarProps = {
-  userOnline: boolean;
-};
+interface UserAvatarProps extends BadgeProps {
+  isOnline?: boolean;
+}
 
 export const UserAvatarStatus = styled(Badge)<UserAvatarProps>`
   padding: 2px;
-  background-color: ${({ userOnline }) => (userOnline ? '#1cfa03' : '#f52c2c')};
+  background-color: ${({ isOnline }) => (isOnline ? '#1cfa03' : '#f52c2c')};
   border-radius: 50%;
 `;
+
+export const TableWraper = styled(Layout)`
+  width: 100%;
+`;
+
+export const TableTitle = styled(Typography.Title)``;

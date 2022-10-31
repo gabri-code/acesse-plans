@@ -1,0 +1,22 @@
+.signup-page {
+  width: 100%;
+  padding: 15px;
+  min-height: 100vh !important;
+  background: linear-gradient(rgba(196, 102, 0, 0.6), rgba(155, 89, 182, 0.6));
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  // overflow: hidden;
+  overflow-y: auto;
+  gap: 20px;
+
+  .progress-bar {
+    max-width: 50%;
+    width: 100%;
+    // background-color: #eee;
+    border-radius: 5px;
+    padding: 10px;
+  }
+}

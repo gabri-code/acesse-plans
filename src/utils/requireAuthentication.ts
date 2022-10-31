@@ -1,6 +1,6 @@
 import { GetServerSidePropsContext } from 'next';
 import { parseCookies } from 'nookies';
-import createApolloClient from '../graphql/client';
+import { initializeApollo } from '../graphql/client';
 import { GET_ME_QUERY } from '../graphql/queries/user/getMe';
 
 export const requireAuthentication = async (
@@ -18,11 +18,20 @@ export const requireAuthentication = async (
     };
   }
 
-  const client = createApolloClient({}, ctx);
+  try {
+    const apolloClient = initializeApollo({}, ctx);
 
-  const { data } = await client.query({
-    query: GET_ME_QUERY,
-  });
+    const { data } = await apolloClient.query({
+      query: GET_ME_QUERY,
+    });
 
-  return callback(client, data.getMe);
+    return callback(apolloClient, data.getMe);
+  } catch (e) {
+    return {
+      redirect: {
+        destination: '/signin',
+        permanent: false,
+      },
+    };
+  }
 };

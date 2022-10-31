@@ -25,7 +25,7 @@ export const StyledHeader = styled(Header)`
 `;
 
 export const StyledPageTitle = styled(Title)`
-  font-size: 32px !important;
+  font-size: 28px !important;
   font-family: 'Gilroy-Medium', sans-serif;
   margin: 0 !important;
 `;

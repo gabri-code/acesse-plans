@@ -8,13 +8,20 @@ import type {
   NextPage,
 } from 'next';
 import { MdDeleteOutline, MdEditNote } from 'react-icons/md';
+import Router from 'next/router';
 import { GET_ALL_USERS_QUERY } from '../../graphql/queries/user/getAll';
 import DefaultLayout from '../../layoults/Default';
-import { NewUserButton, UserAvatarStatus } from '../../styles/UserManagers';
-import { UserResponse } from '../../types';
+import {
+  NewUserButton,
+  TableTitle,
+  TableWraper,
+  UserAvatarStatus,
+} from '../../styles/UserManagers';
+import { PreUserResponse, Role, UserResponse } from '../../types';
 import { requireAuthentication } from '../../utils/requireAuthentication';
+import { GET_PRE_USERS_QUERY } from '../../graphql/queries/user/getPreUsers';
 
-const rolesPT = {
+export const rolesPT = {
   admin: 'Administrador',
   manager: 'Gerente',
   seller: 'Vendedor',
@@ -25,25 +32,32 @@ export interface IPageProps {
   title: string;
   users: UserResponse[];
   user: UserResponse;
+  preUsers: PreUserResponse[];
 }
 
-interface DataType {
+interface DataTypeUser {
   key: string;
   name: string;
   online: boolean;
   avatar: string;
-  role: string[];
+  roles: Role[];
 }
 
-const UsersManager: NextPage<IPageProps> = ({ title, users }) => {
-  const columns: ColumnsType<DataType> = [
+interface DataTypePreUser {
+  key: string;
+  email: string;
+  roles: Role[];
+}
+
+const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
+  const columns: ColumnsType<DataTypeUser> = [
     {
       dataIndex: 'avatar',
       key: 'avatar',
       align: 'center',
       width: '50px',
       render: (avatar, data) => (
-        <UserAvatarStatus userOnline={data.online}>
+        <UserAvatarStatus isOnline={data.online}>
           <Avatar src={avatar} />
         </UserAvatarStatus>
       ),
@@ -56,10 +70,10 @@ const UsersManager: NextPage<IPageProps> = ({ title, users }) => {
     },
     {
       title: 'Função',
-      dataIndex: 'role',
-      key: 'role',
-      render: (roles: string[]) =>
-        roles.map((role) => (
+      dataIndex: 'roles',
+      key: 'roles',
+      render: (roles: Role[]) =>
+        roles?.map((role) => (
           <Tag color="blue" key={role}>
             {role}
           </Tag>
@@ -116,21 +130,111 @@ const UsersManager: NextPage<IPageProps> = ({ title, users }) => {
     },
   ];
 
-  const data: DataType[] = users.map((user) => ({
+  const data: DataTypeUser[] = users.map((user) => ({
     key: user.id,
     name: user.fullName,
-    role: user.role.map((role) => rolesPT[role]),
+    roles: user.roles.map((role) => rolesPT[role] as Role),
     online: user.active,
-    avatar:
-      'https://blog.unyleya.edu.br/wp-content/uploads/2017/12/saiba-como-a-educacao-ajuda-voce-a-ser-uma-pessoa-melhor.jpeg',
+    avatar: user.picture,
+  }));
+
+  const preUsersColumns: ColumnsType<DataTypePreUser> = [
+    {
+      title: 'E-mail',
+      dataIndex: 'email',
+      key: 'email',
+      render: (text: string) => <a>{text}</a>,
+    },
+    {
+      title: 'Função',
+      dataIndex: 'roles',
+      key: 'roles',
+      render: (roles: Role[]) =>
+        roles?.map((role) => (
+          <Tag color="blue" key={role}>
+            {role}
+          </Tag>
+        )),
+    },
+    {
+      title: 'Ação',
+      key: 'action',
+      width: '200px',
+      render: () => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={
+              <MdEditNote
+                size={15}
+                style={{
+                  marginRight: 5,
+                }}
+              />
+            }
+            size="middle"
+            style={{
+              background: '#dea74f',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            Reenviar código de registro
+          </Button>
+          <Button
+            type="primary"
+            icon={
+              <MdDeleteOutline
+                size={15}
+                style={{
+                  marginRight: 5,
+                }}
+              />
+            }
+            size="middle"
+            style={{
+              background: '#aa3838',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            Remover
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const preUsersData: DataTypePreUser[] = preUsers.map((user) => ({
+    key: user.id,
+    email: user.email,
+    roles: user.roles.map((role) => rolesPT[role] as Role),
   }));
 
   return (
     <DefaultLayout title={title}>
-      <NewUserButton type="primary" icon={<UserAddOutlined />} size="large">
+      <NewUserButton
+        type="primary"
+        icon={<UserAddOutlined />}
+        size="large"
+        onClick={() => Router.push(Router.pathname.concat('/novo'))}
+      >
         Novo usuário
       </NewUserButton>
-      <Table columns={columns} dataSource={data} />
+      <TableWraper>
+        <TableTitle level={5}>Usuários Cadastrados</TableTitle>
+        <Table columns={columns} dataSource={data} scroll={{ x: 240 }} />
+      </TableWraper>
+      <TableWraper>
+        <TableTitle level={5}>Usuários Pendentes</TableTitle>
+        <Table
+          columns={preUsersColumns}
+          dataSource={preUsersData}
+          scroll={{ x: 240 }}
+        />
+      </TableWraper>
     </DefaultLayout>
   );
 };
@@ -141,12 +245,18 @@ export const getServerSideProps: GetServerSideProps = async (
   return requireAuthentication(
     context,
     async (client: ApolloClient<NormalizedCacheObject>, user: UserResponse) => {
-      const { data } = await client.query({ query: GET_ALL_USERS_QUERY });
+      const {
+        data: { getAllUsers },
+      } = await client.query({ query: GET_ALL_USERS_QUERY });
+      const {
+        data: { getPreUsers },
+      } = await client.query({ query: GET_PRE_USERS_QUERY });
 
       return {
         props: {
           title: 'Gerenciamento de Usuários',
-          users: data.getAllUsers,
+          users: getAllUsers,
+          preUsers: getPreUsers,
           user,
         },
       };

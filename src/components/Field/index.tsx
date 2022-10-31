@@ -14,6 +14,8 @@ interface IField extends InputProps {
   label: string;
   error?: string;
   prefix?: ReactNode;
+  bordered?: boolean | false;
+  transparent?: boolean | false;
 }
 
 const InputField: FC<IField> = ({
@@ -22,17 +24,20 @@ const InputField: FC<IField> = ({
   placeholder,
   type,
   prefix,
+  bordered,
+  transparent,
   ...props
 }) => {
   return (
     <Container direction="vertical">
       <InputLabel>{label}</InputLabel>
-      <WrapInput>
+      <WrapInput bordered={bordered} transparent={transparent}>
         {prefix}
         <StyledField
           type={type}
           placeholder={placeholder}
           name={name}
+          transparent={transparent}
           {...props}
         />
       </WrapInput>

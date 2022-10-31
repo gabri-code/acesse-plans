@@ -13,7 +13,7 @@ export const StyledOverviewContainer = styled(Layout)`
   .cards-container {
     display: flex;
     flex-wrap: wrap;
-    row-gap: 10px;
+    gap: 10px;
   }
 
   .period-value {
