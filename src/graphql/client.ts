@@ -1,17 +1,44 @@
 import { useMemo } from 'react';
 import type { GetServerSidePropsContext } from 'next';
-import type { NormalizedCacheObject } from '@apollo/client';
+import { NormalizedCacheObject, split } from '@apollo/client';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { parseCookies } from 'nookies';
+import { createClient } from 'graphql-ws';
+import { getMainDefinition } from '@apollo/client/utilities';
+// import WebSocket from 'ws';
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 const createApolloClient = (ctx?: GetServerSidePropsContext) => {
   const httpLink = new HttpLink({
-    uri: 'http://localhost:4000/',
-    credentials: 'same-origin',
+    uri: 'http://localhost:4000/graphql',
   });
+
+  const wsLink =
+    typeof window !== 'undefined'
+      ? new GraphQLWsLink(
+          createClient({
+            url: 'ws://localhost:4000/graphql',
+          })
+        )
+      : null;
+
+  const link =
+    typeof window !== 'undefined' && wsLink != null
+      ? split(
+          ({ query }) => {
+            const def = getMainDefinition(query);
+            return (
+              def.kind === 'OperationDefinition' &&
+              def.operation === 'subscription'
+            );
+          },
+          wsLink,
+          httpLink
+        )
+      : httpLink;
 
   const authLink = setContext((_, { headers }) => {
     const { 'acesse-token': token } = ctx ? parseCookies(ctx) : parseCookies();
@@ -26,7 +53,7 @@ const createApolloClient = (ctx?: GetServerSidePropsContext) => {
 
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    link: authLink.concat(httpLink),
+    link: authLink.concat(link),
     cache: new InMemoryCache(),
   });
 };

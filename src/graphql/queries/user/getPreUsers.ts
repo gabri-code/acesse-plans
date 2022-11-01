@@ -5,7 +5,7 @@ export const GET_PRE_USERS_QUERY = gql`
     getPreUsers {
       email
       id
-      roles
+      role
     }
   }
 `;

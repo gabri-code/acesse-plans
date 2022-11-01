@@ -1,6 +1,6 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
-import { Avatar, Button, Space, Table, Tag } from 'antd';
+import { Avatar, Button, Layout, Space, Table, Tag } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import type {
   GetServerSideProps,
@@ -24,7 +24,7 @@ import { GET_PRE_USERS_QUERY } from '../../graphql/queries/user/getPreUsers';
 export const rolesPT = {
   admin: 'Administrador',
   manager: 'Gerente',
-  seller: 'Vendedor',
+  indicator: 'Indicador',
   test: 'Teste',
 };
 
@@ -40,13 +40,13 @@ interface DataTypeUser {
   name: string;
   online: boolean;
   avatar: string;
-  roles: Role[];
+  role: Role;
 }
 
 interface DataTypePreUser {
   key: string;
   email: string;
-  roles: Role[];
+  role: Role;
 }
 
 const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
@@ -70,14 +70,13 @@ const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
     },
     {
       title: 'Função',
-      dataIndex: 'roles',
-      key: 'roles',
-      render: (roles: Role[]) =>
-        roles?.map((role) => (
-          <Tag color="blue" key={role}>
-            {role}
-          </Tag>
-        )),
+      dataIndex: 'role',
+      key: 'role',
+      render: (role: Role) => (
+        <Tag color="blue" key={role}>
+          {role}
+        </Tag>
+      ),
     },
     {
       title: 'Ação',
@@ -133,7 +132,7 @@ const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
   const data: DataTypeUser[] = users.map((user) => ({
     key: user.id,
     name: user.fullName,
-    roles: user.roles.map((role) => rolesPT[role] as Role),
+    role: rolesPT[user.role] as Role,
     online: user.active,
     avatar: user.picture,
   }));
@@ -147,14 +146,13 @@ const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
     },
     {
       title: 'Função',
-      dataIndex: 'roles',
-      key: 'roles',
-      render: (roles: Role[]) =>
-        roles?.map((role) => (
-          <Tag color="blue" key={role}>
-            {role}
-          </Tag>
-        )),
+      dataIndex: 'role',
+      key: 'role',
+      render: (role: Role) => (
+        <Tag color="blue" key={role}>
+          {role}
+        </Tag>
+      ),
     },
     {
       title: 'Ação',
@@ -210,7 +208,7 @@ const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
   const preUsersData: DataTypePreUser[] = preUsers.map((user) => ({
     key: user.id,
     email: user.email,
-    roles: user.roles.map((role) => rolesPT[role] as Role),
+    role: rolesPT[user.role] as Role,
   }));
 
   return (
@@ -223,18 +221,23 @@ const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
       >
         Novo usuário
       </NewUserButton>
-      <TableWraper>
-        <TableTitle level={5}>Usuários Cadastrados</TableTitle>
-        <Table columns={columns} dataSource={data} scroll={{ x: 240 }} />
-      </TableWraper>
-      <TableWraper>
-        <TableTitle level={5}>Usuários Pendentes</TableTitle>
-        <Table
-          columns={preUsersColumns}
-          dataSource={preUsersData}
-          scroll={{ x: 240 }}
-        />
-      </TableWraper>
+      <Layout>
+        <TableWraper direction="vertical">
+          <TableTitle level={5}>Usuários Cadastrados</TableTitle>
+          <Table columns={columns} dataSource={data} scroll={{ x: 240 }} />
+        </TableWraper>
+        <TableWraper direction="vertical">
+          <TableTitle level={5}>Usuários Pendentes</TableTitle>
+          <Table
+            columns={preUsersColumns}
+            dataSource={preUsersData}
+            scroll={{ x: 240 }}
+            locale={{
+              emptyText: 'Nenhum registro iniciado.',
+            }}
+          />
+        </TableWraper>
+      </Layout>
     </DefaultLayout>
   );
 };

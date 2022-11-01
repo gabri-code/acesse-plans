@@ -17,9 +17,28 @@ export const StyledInput = styled(Input)`
 
 export const StyledSelect = styled(Select)`
   .ant-select-selector {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    height: fit-content !important;
+
+    .ant-select-selection-item {
+      height: fit-content !important;
+      /* padding-top: 10px !important;
+      padding-bottom: 10px !important; */
+      line-height: none !important;
+    }
   }
+
+  /* .ant-select-selection-search {
+    height: auto !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+
+    input {
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+    } */
+  /* } */
 `;
 
 export const StyledSaveButton = styled(SubmitButton)`

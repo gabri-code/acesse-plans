@@ -23,9 +23,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ApolloProvider client={client}>
       <AuthProvider>
         <GlobalStyle />
-        <PageLoader>
-          <Component {...pageProps} />
-        </PageLoader>
+        {/* <PageLoader> */}
+        <Component {...pageProps} />
+        {/* </PageLoader> */}
       </AuthProvider>
     </ApolloProvider>
   );

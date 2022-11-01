@@ -1,7 +1,7 @@
 export enum CustomerStatus {
   pending = 'pending',
   canceled = 'canceled',
-  aproved = 'aproved',
+  approved = 'approved',
 }
 
 export type CustomerModel = {
@@ -21,7 +21,7 @@ export interface UserLogin {
   password: string;
 }
 
-export type Role = 'admin' | 'manager' | 'seller' | 'test';
+export type Role = 'admin' | 'manager' | 'indicator' | 'test';
 
 export interface UserResponse {
   id: string;
@@ -33,7 +33,7 @@ export interface UserResponse {
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
-  roles: Role[];
+  role: Role;
   customers: CustomerModel[];
   commissions: number;
 }
@@ -41,7 +41,7 @@ export interface UserResponse {
 export interface PreUserResponse {
   id: string;
   email: string;
-  roles: Role[];
+  role: Role;
 }
 
 export type MainResponse = {
@@ -58,7 +58,7 @@ export type UserRegister = {
   phone: string;
   address: string;
   picture: string;
-  roles: Role[];
+  role: Role;
   // bank: string;
   // bankAccount: string;
   // bankAgency: string;

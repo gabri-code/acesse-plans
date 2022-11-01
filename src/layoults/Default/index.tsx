@@ -4,10 +4,12 @@ import {
   MdContactPage,
   MdOutlineDashboard,
 } from 'react-icons/md';
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
 import { MenuInfo } from 'rc-menu/lib/interface';
+import { useSubscription } from '@apollo/client';
+import { notification } from 'antd';
 import {
   StyledLayout,
   StyledLayoutContent,
@@ -18,6 +20,7 @@ import {
 } from './style';
 import Header from '../../components/Header';
 import { HeadComponent } from '../../components/Head';
+import { NEW_REGISTER_SUBSCRIPTION } from '../../graphql/subscriptions/registerNotification';
 
 // type MenuItem = Required<MenuProps>['items'][number];
 
@@ -28,6 +31,29 @@ const DefaultLayout: FC<{ children: ReactNode; title: string }> = ({
   const router = useRouter();
 
   const [current, setCurrent] = useState(router.pathname);
+
+  const { data } = useSubscription(NEW_REGISTER_SUBSCRIPTION);
+
+  const openNotification = useCallback(() => {
+    const {
+      newRegister: { message },
+    } = data;
+    notification['info']({
+      message: 'Novo cadastro concluído',
+      description: message,
+      duration: 8,
+      placement: 'bottomRight',
+      // onClick: () => {
+      //   console.log('Notification Clicked!');
+      // },
+    });
+  }, [data]);
+
+  useEffect(() => {
+    if (data) {
+      openNotification();
+    }
+  }, [data, openNotification]);
 
   useEffect(() => {
     if (location) {

@@ -1,3 +1,3 @@
 import { Role } from '../types';
 
-export default ['admin', 'seller', 'manager'] as Role[];
+export default ['admin', 'indicator'] as Role[];

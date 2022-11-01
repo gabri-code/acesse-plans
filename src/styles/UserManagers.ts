@@ -16,7 +16,7 @@ export const UserAvatarStatus = styled(Badge)<UserAvatarProps>`
   border-radius: 50%;
 `;
 
-export const TableWraper = styled(Layout)`
+export const TableWraper = styled(Space)`
   width: 100%;
 `;
 

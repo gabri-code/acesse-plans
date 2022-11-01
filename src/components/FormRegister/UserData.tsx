@@ -91,7 +91,7 @@ const FormRegisterUserData: FC<IFormUserData> = ({
       picture: values.picture,
       fullName: values.fullName,
       email: preUser?.email,
-      roles: preUser?.roles,
+      role: preUser?.role,
     });
     handleFinishStep();
   };
@@ -182,11 +182,10 @@ const FormRegisterUserData: FC<IFormUserData> = ({
               prefix={<LockFilled />}
             />
           </WrapInput>
-          <WrapInput name="roles" label="Função">
+          <WrapInput name="role" label="Função">
             <StyledSelect
-              name="roles"
-              mode="multiple"
-              defaultValue={preUser?.roles}
+              name="role"
+              defaultValue={preUser?.role}
               suffixIcon={<MailFilled />}
               disabled
             />

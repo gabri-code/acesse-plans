@@ -1,7 +1,8 @@
-import { FormikErrors, FormikFormProps } from 'formik';
+import { FormikFormProps } from 'formik';
 import { FC } from 'react';
 import { MdEmail, MdFactCheck } from 'react-icons/md';
 import Router from 'next/router';
+import { Radio } from 'formik-antd';
 import {
   Container,
   FormTitle,
@@ -13,13 +14,8 @@ import {
 } from './style';
 import roles from '../../utils/roles';
 import { rolesPT } from '../../pages/gerenciamento-usuarios';
-import { Role } from '../../types';
 
 interface IFormPreRegister extends FormikFormProps {
-  errors?: FormikErrors<{
-    email: string;
-    roles: Role[];
-  }>;
   loading?: boolean;
 }
 
@@ -30,14 +26,15 @@ const FormPreRegister: FC<IFormPreRegister> = ({ loading, ...props }) => {
       <Container.Item name="email" label="E-mail">
         <StyledInput name="email" prefix={<MdEmail />} />
       </Container.Item>
-      <Container.Item name="roles" label="Função">
-        <StyledSelect name="roles" suffixIcon={<MdFactCheck />} mode="multiple">
-          {roles.map((role) => (
-            <StyledSelect.Option key={role} value={role}>
-              {rolesPT[role]}
-            </StyledSelect.Option>
-          ))}
-        </StyledSelect>
+      <Container.Item name="role" label="Função">
+        <Radio.Group
+          name="role"
+          defaultValue="indicator"
+          style={{ display: 'flex', gap: 10 }}
+        >
+          <Radio.Button value="indicator">Indicador</Radio.Button>
+          <Radio.Button value="admin">Administrador</Radio.Button>
+        </Radio.Group>
       </Container.Item>
       <StyledButtonGroup>
         <StyledCancelButton

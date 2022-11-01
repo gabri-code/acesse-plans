@@ -18,17 +18,14 @@ import { Role, UserResponse } from '../../types';
 import { requireAuthentication } from '../../utils/requireAuthentication';
 import { PRE_USER_REGISTER_MUTATION } from '../../graphql/mutations/user/preRegister';
 
-const phoneRegExp =
-  /^\s*(\d{2}|\d{0})[-. ]?(\d{5}|\d{4})[-. ]?(\d{4})[-. ]?\s*$/;
-
 interface FormValues {
   email: string;
-  roles: Role[];
+  role: Role;
 }
 
 const initialValues: FormValues = {
   email: '',
-  roles: [],
+  role: 'indicator',
 };
 
 export const rolesPT = {
@@ -47,18 +44,18 @@ export interface IPageProps {
 const success = (email: string) => {
   message.success(
     `Cadastro iniciado com sucesso. Um código de registro foi enviado para o email ${email}.`,
-    10
+    5
   );
 };
 
-const UsersManager: NextPage<IPageProps> = ({ title, users }) => {
+const UsersManager: NextPage<IPageProps> = ({ title }) => {
   const [preUserRegister, { loading }] = useMutation(
     PRE_USER_REGISTER_MUTATION
   );
 
   const handleSubmit = async (
     values: FormValues,
-    { setErrors }: FormikHelpers<FormValues>
+    { setErrors, resetForm }: FormikHelpers<FormValues>
   ) => {
     try {
       await preUserRegister({
@@ -67,6 +64,7 @@ const UsersManager: NextPage<IPageProps> = ({ title, users }) => {
         },
       });
       success(values.email);
+      resetForm();
     } catch (error: any) {
       setErrors({ email: error.message });
     }
@@ -78,7 +76,7 @@ const UsersManager: NextPage<IPageProps> = ({ title, users }) => {
       .string()
       .email('E-mail inválido.')
       .required('E-mail obrigatório.'),
-    roles: yup.array().min(1, 'Insira pelo menos 1 função.'),
+    role: yup.string().required('Insira a função desse usuário.'),
   });
 
   return (
@@ -88,7 +86,7 @@ const UsersManager: NextPage<IPageProps> = ({ title, users }) => {
         onSubmit={handleSubmit}
         validationSchema={schema}
       >
-        {({ errors }) => <FormPreRegister errors={errors} loading={loading} />}
+        {() => <FormPreRegister loading={loading} />}
       </Formik>
     </DefaultLayout>
   );

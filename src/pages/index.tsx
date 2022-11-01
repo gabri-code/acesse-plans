@@ -6,8 +6,15 @@ import type {
 import 'moment/locale/pt-br';
 import locale from 'antd/lib/locale/pt_BR';
 import DatePicker, { RangePickerProps } from 'antd/lib/date-picker';
-import { useContext, useEffect, useState } from 'react';
-import { ConfigProvider, Dropdown, MenuProps, Space, Typography } from 'antd';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import {
+  ConfigProvider,
+  Dropdown,
+  MenuProps,
+  notification,
+  Space,
+  Typography,
+} from 'antd';
 import moment from 'moment';
 import {
   DownOutlined,
@@ -15,7 +22,11 @@ import {
   SolutionOutlined,
   UsergroupAddOutlined,
 } from '@ant-design/icons';
-import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
+import {
+  ApolloClient,
+  NormalizedCacheObject,
+  useSubscription,
+} from '@apollo/client';
 import { requireAuthentication } from '../utils/requireAuthentication';
 import { UserResponse } from '../types';
 import DefaultLayoult from '../layoults/Default';
@@ -28,6 +39,7 @@ import {
   StyledOverviewContainer,
 } from '../styles/Home';
 import { AuthContext } from '../contexts/AuthContext';
+import { NEW_REGISTER_SUBSCRIPTION } from '../graphql/subscriptions/registerNotification';
 
 const { Text } = Typography;
 

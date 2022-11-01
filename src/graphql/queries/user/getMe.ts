@@ -5,7 +5,7 @@ export const GET_ME_QUERY = gql`
     getMe {
       active
       fullName
-      roles
+      role
       picture
       id
     }

@@ -73,7 +73,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
 
   const [confirmedData, setConfirmedData] = useState(false);
 
-  const [signUp] = useMutation(SIGNUP_MUTATION);
+  const [signUp, { loading }] = useMutation(SIGNUP_MUTATION);
 
   const RegisterValidationSchema = yup.object().shape({
     phone: yup
@@ -197,7 +197,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
       password: dataRegister?.password ?? '',
       phone: personalData?.phone ?? '',
       picture: dataRegister?.picture ?? '',
-      roles: dataRegister?.roles ?? [],
+      role: dataRegister?.role ?? 'indicator',
       birthDay: parse(
         personalData?.birthDay as string,
         'dd/MM/yyyy',
@@ -211,12 +211,24 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
     console.log(userData);
 
     try {
-      const data = await signUp({
+      const {
+        data: {
+          signUp: { data, error },
+        },
+      } = await signUp({
         variables: {
           data: userData,
         },
       });
-      Router.push('/signin');
+
+      if (error) {
+        ref.current?.setFieldError(error.field, error.message);
+        return;
+      }
+
+      if (data) {
+        Router.push('/signin');
+      }
     } catch (e) {
       console.log(e);
     }
@@ -398,7 +410,10 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                 </Col>
               </Row>
             </StyledFieldSet> */}
-            <Checkbox onChange={() => setConfirmedData((prev) => !prev)}>
+            <Checkbox
+              onChange={() => setConfirmedData((prev) => !prev)}
+              disabled={confirmedData}
+            >
               Confirmo que meus dados estão corretos.
             </Checkbox>
             <StyledNextButton
@@ -406,6 +421,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
               htmlType="submit"
               // loading={registerCodeLoading}
               disabled={!confirmedData}
+              loading={loading}
             >
               Finalizar
               <CheckCircleOutlined />

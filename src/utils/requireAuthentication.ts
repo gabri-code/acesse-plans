@@ -27,6 +27,7 @@ export const requireAuthentication = async (
 
     return callback(apolloClient, data.getMe);
   } catch (e) {
+    console.log(e);
     return {
       redirect: {
         destination: '/signin',

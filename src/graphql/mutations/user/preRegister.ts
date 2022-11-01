@@ -21,7 +21,7 @@ export const PRE_SIGNUP_VERIFICATION_MUTATION = gql`
       data {
         id
         email
-        roles
+        role
       }
     }
   }
@@ -32,7 +32,7 @@ export const PRE_SIGNUP_VALIDATION_MUTATION = gql`
     signUpVerification(data: $data) {
       id
       email
-      roles
+      role
     }
   }
 `;

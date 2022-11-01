@@ -24,8 +24,9 @@ export const StyledLogo = styled(LogoAcesse)`
 export const StyledLayoutContent = styled(Layout)`
   background: #efefef;
   padding: 28px 15px 0px 22px;
+  height: 100%;
   overflow: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
 `;
 
 export const StyledSiderMenu = styled(Menu)`
