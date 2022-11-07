@@ -2,6 +2,7 @@ import 'moment/locale/pt-br';
 import {
   MdAdminPanelSettings,
   MdContactPage,
+  MdDashboardCustomize,
   MdOutlineDashboard,
 } from 'react-icons/md';
 import React, { FC, ReactNode, useCallback, useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ import { useRouter } from 'next/router';
 import { MenuInfo } from 'rc-menu/lib/interface';
 import { useSubscription } from '@apollo/client';
 import { notification } from 'antd';
+import { AppstoreAddOutlined } from '@ant-design/icons';
 import {
   StyledLayout,
   StyledLayoutContent,
@@ -97,6 +99,12 @@ const DefaultLayout: FC<{ children: ReactNode; title: string }> = ({
               title="Gerenciar clientes"
               icon={<MdContactPage size={30} />}
               onClick={() => router.push('/')}
+            />
+            <StyledSiderMenuItem
+              key="/gerenciamento-produtos"
+              title="Gerenciar produtos"
+              icon={<MdDashboardCustomize size={30} />}
+              onClick={() => router.push('/gerenciamento-produtos')}
             />
           </StyledSiderMenu>
         </StyledSider>

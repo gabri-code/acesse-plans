@@ -49,7 +49,12 @@ interface DataTypePreUser {
   role: Role;
 }
 
-const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
+const UsersManager: NextPage<IPageProps> = ({
+  title,
+  users,
+  preUsers,
+  user: currUser,
+}) => {
   const columns: ColumnsType<DataTypeUser> = [
     {
       dataIndex: 'avatar',
@@ -129,13 +134,15 @@ const UsersManager: NextPage<IPageProps> = ({ title, users, preUsers }) => {
     },
   ];
 
-  const data: DataTypeUser[] = users.map((user) => ({
-    key: user.id,
-    name: user.fullName,
-    role: rolesPT[user.role] as Role,
-    online: user.active,
-    avatar: user.picture,
-  }));
+  const data: DataTypeUser[] = users
+    .filter((user) => user.id !== currUser.id)
+    .map((user) => ({
+      key: user.id,
+      name: user.fullName,
+      role: rolesPT[user.role] as Role,
+      online: user.active,
+      avatar: user.picture,
+    }));
 
   const preUsersColumns: ColumnsType<DataTypePreUser> = [
     {

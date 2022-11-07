@@ -3,10 +3,20 @@ import { ChangeEvent, FC, FormEvent, useCallback, useState } from 'react';
 import { StyledInput } from './style';
 
 interface InputMaskProps extends InputProps {
-  mask: 'cpf' | 'phone' | 'cep' | 'bank' | 'birth';
+  mask: 'cpf' | 'phone' | 'cep' | 'bank' | 'birth' | 'currency';
+  setFieldValue: (
+    field: string,
+    value: any,
+    shouldValidate?: boolean | undefined
+  ) => void;
 }
 
-export const InputMask: FC<InputMaskProps> = ({ mask, ...props }) => {
+export const InputMask: FC<InputMaskProps> = ({
+  mask,
+  name,
+  setFieldValue,
+  ...props
+}) => {
   const [inputValue, setInputValue] = useState('');
 
   const handleBankInput = useCallback(
@@ -17,6 +27,20 @@ export const InputMask: FC<InputMaskProps> = ({ mask, ...props }) => {
       setInputValue(value);
     },
     []
+  );
+
+  const handleCurrencyInput = useCallback(
+    ({ currentTarget }: FormEvent<HTMLInputElement>) => {
+      let value = currentTarget.value;
+
+      value = value
+        .replace(/\D/g, '')
+        .replace(/\D/g, ' ')
+        .replace(/(\d)(\d{2})$/, '$1.$2')
+        .replace(/(?=(\d{3})+(\D))\B/g, ' ');
+      setFieldValue(name, value);
+    },
+    [name, setFieldValue]
   );
 
   const handleBirthDateInput = useCallback(
@@ -83,22 +107,23 @@ export const InputMask: FC<InputMaskProps> = ({ mask, ...props }) => {
     cep: handleCepInput,
     bank: handleBankInput,
     birth: handleBirthDateInput,
+    currency: handleCurrencyInput,
   };
 
   const callMaskFunction = maskFunctions[mask];
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log('chamou');
-    if (props.onChange) props.onChange(event);
+  // const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   if (props.onChange) props.onChange(event);
 
-    if (mask) callMaskFunction(event);
-  };
+  //   if (mask) callMaskFunction(event);
+  // };
 
   return (
     <StyledInput
       {...props}
-      value={inputValue}
-      onChange={handleChange}
+      // value={inputValue}
+      name={name}
+      onKeyUp={callMaskFunction}
       onKeyDown={(e) => {
         const isNumber = Number(e.key);
 

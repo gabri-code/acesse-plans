@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 export const NewUserButton = styled(Button)`
   align-self: flex-start;
-  margin-bottom: 30px;
 `;
 
 interface UserAvatarProps extends BadgeProps {

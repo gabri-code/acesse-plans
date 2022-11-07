@@ -62,4 +62,14 @@ html {
   font-family: 'Gilroy-Regular', sans-serif;
 }
 
+.ant-modal-wrap {
+  overflow: hidden;
+  height: 100%;
+
+  .ant-modal-body {
+    height: 100%;
+
+  }
+}
+
 `;

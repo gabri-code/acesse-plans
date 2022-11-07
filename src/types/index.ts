@@ -63,3 +63,21 @@ export type UserRegister = {
   // bankAccount: string;
   // bankAgency: string;
 };
+
+export interface AdditionalItem {
+  name: string;
+  icon: string;
+  id: number;
+}
+
+export interface Product {
+  __typename?: string;
+  id: number;
+  additionalItems: AdditionalItem[];
+  active: boolean;
+  installationFidelity: number;
+  installationNormal: number;
+  plan: string;
+  price: number;
+  promotionalPrice: number;
+}
