@@ -30,11 +30,11 @@ import { isEqual } from 'lodash';
 import { Container, StyledInput, StyledTextField, StyledUpload } from './style';
 import { InputMask } from '../InputMask';
 import { NEW_ADDITIONAL_SUBSCRIPTION } from '../../graphql/subscriptions/newAdditional';
-import { ADDITIONAL_ITEM_MUTATION } from '../../graphql/mutations/user/additionalItem';
 import { AdditionalItem, Product } from '../../types';
-import { CREATE_PRODUCT_MUTATION } from '../../graphql/mutations/user/createProduct';
-import { UPDATE_PRODUCT_MUTATION } from '../../graphql/mutations/user/updateProduct';
-import { DELETE_PRODUCT_MUTATION } from '../../graphql/mutations/user/deleteProduct';
+import { CREATE_PRODUCT_MUTATION } from '../../graphql/mutations/product/createProduct';
+import { ADDITIONAL_ITEM_MUTATION } from '../../graphql/mutations/product/additionalItem';
+import { UPDATE_PRODUCT_MUTATION } from '../../graphql/mutations/product/updateProduct';
+import { DELETE_PRODUCT_MUTATION } from '../../graphql/mutations/product/deleteProduct';
 
 interface IFormProduct extends FormikFormProps {
   loading?: boolean;

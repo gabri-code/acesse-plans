@@ -1,14 +1,11 @@
 import type { AppProps } from 'next/app';
 
-import 'antd/dist/antd.css';
-
-// import '../styles/global.scss';
+import { ChakraProvider } from '@chakra-ui/react';
 
 import { ApolloProvider } from '@apollo/client';
 import { AuthProvider } from '../contexts/AuthContext';
-import { GlobalStyle } from '../styles/globalStyle';
-import PageLoader from '../components/PageLoader';
 import { useApollo } from '../graphql/client';
+import GlobalStyle from '../styles/GlobalStyle';
 
 function MyApp({ Component, pageProps }: AppProps) {
   // const protectedRoutes = [
@@ -22,10 +19,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ApolloProvider client={client}>
       <AuthProvider>
-        <GlobalStyle />
-        {/* <PageLoader> */}
-        <Component {...pageProps} />
-        {/* </PageLoader> */}
+        <ChakraProvider>
+          <GlobalStyle />
+          <Component {...pageProps} />
+        </ChakraProvider>
       </AuthProvider>
     </ApolloProvider>
   );
