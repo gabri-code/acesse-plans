@@ -22,4 +22,12 @@ const fonts = {
   'Gilroy-Thin': 'Gilroy-Thin',
 };
 
-export const theme = extendTheme({ colors, fonts });
+const breakpoints = {
+  sm: '576px',
+  md: '811px',
+  lg: '960px',
+  xl: '1200px',
+  '2xl': '1536px',
+};
+
+export const theme = extendTheme({ colors, fonts, breakpoints });

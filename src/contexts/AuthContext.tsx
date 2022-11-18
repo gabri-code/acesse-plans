@@ -44,13 +44,15 @@ export const AuthProvider: FC<AuthProviderType> = ({ children }) => {
     try {
       const {
         data: {
-          signIn: { token },
+          signIn: { token, user },
         },
       } = await signInRequest({ variables: { data: { email, password } } });
 
       setCookie(undefined, 'acesse-token', token, {
         maxAge: 60 * 60 * 8, // 8 horas
       });
+
+      setUser(user);
 
       Router.push('/');
     } catch (error: any) {

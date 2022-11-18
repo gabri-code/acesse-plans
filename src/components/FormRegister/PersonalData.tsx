@@ -1,4 +1,4 @@
-import { Formik, FormikFormProps, FormikProps } from 'formik';
+import { Formik, FormikFormProps, FormikProps, useFormikContext } from 'formik';
 import { ChangeEvent, FC, useContext, useRef, useState } from 'react';
 import * as yup from 'yup';
 import {
@@ -70,6 +70,7 @@ const zipRegExp = /^[0-9]{5}-[0-9]{3}$/;
 const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
   const [getLocation] = useLazyQuery(GET_LOCATION_QUERY);
   const { dataRegister } = useContext(UserRegisterContext);
+  const { setFieldValue } = useFormikContext();
 
   const [confirmedData, setConfirmedData] = useState(false);
 
@@ -257,6 +258,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                       name="phone"
                       placeholder="(32) 9 1234-5678"
                       mask="phone"
+                      setFieldValue={setFieldValue}
                     />
                   </WrapInput>
                 </Col>
@@ -267,6 +269,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                       placeholder="123.456.789-10"
                       name="cpf"
                       prefix={<NumberOutlined />}
+                      setFieldValue={setFieldValue}
                     />
                   </WrapInput>
                 </Col>
@@ -281,6 +284,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                       placeholder="10/01/1990"
                       name="birthDay"
                       prefix={<CalendarFilled />}
+                      setFieldValue={setFieldValue}
                     />
                   </WrapInput>
                 </Col>
@@ -332,6 +336,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                       placeholder="36830-000"
                       suffix={<span />}
                       onChange={getCityByCEP}
+                      setFieldValue={setFieldValue}
                     />
                   </WrapInput>
                 </Col>

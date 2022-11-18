@@ -14,7 +14,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "typeRoots": ["node_modules/yup"]
   },
   "include": [
     "next-env.d.ts",

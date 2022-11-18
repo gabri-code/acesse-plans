@@ -1,4 +1,4 @@
-import { Formik, FormikFormProps, FormikHelpers, FormikProps } from 'formik';
+import { Formik, FormikFormProps, FormikProps } from 'formik';
 import { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import { Checkbox, Select } from 'formik-antd';
 import {
@@ -67,7 +67,6 @@ const getBase64 = (img: RcFile, callback: (url: string) => void) => {
 
 const AdditionalItem = ({
   additionalItems,
-  setFieldValue,
   defaultSelected,
 }: {
   additionalItems: AdditionalItem[];
@@ -78,9 +77,6 @@ const AdditionalItem = ({
   const [imageUrl, setImageUrl] = useState<string>('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [options, setOptions] = useState(additionalItems);
-  const [productAdditional, setProductAdditional] = useState<
-    { additionalId: number }[]
-  >([]);
 
   interface AdditionalValues {
     icon: string;
@@ -139,7 +135,7 @@ const AdditionalItem = ({
   const handleNewAdditional = async (values: AdditionalValues) => {
     const {
       data: {
-        createAdditionalItem: { data, error },
+        createAdditionalItem: { error },
       },
     } = await addItem({
       variables: {
@@ -295,8 +291,6 @@ const onRegisterSuccess = (messageValue: string) => {
   message.success(messageValue);
 };
 
-interface NormalizedProduct {}
-
 interface FormPlanValues extends PlanValues {
   id?: number;
 }
@@ -311,9 +305,7 @@ const FormPlan: FC<IFormProduct> = ({
   refetchProducts,
   ...props
 }) => {
-  const [updatePlan, { loading: loadingUpdate }] = useMutation(
-    UPDATE_PRODUCT_MUTATION
-  );
+  const [updatePlan] = useMutation(UPDATE_PRODUCT_MUTATION);
   const [deletePlan, { loading: loadingDelete }] = useMutation(
     DELETE_PRODUCT_MUTATION
   );
@@ -388,15 +380,12 @@ const FormPlan: FC<IFormProduct> = ({
     if (isEditing) handleEditing(false);
   };
 
-  const handleSubmit = async (
-    values: FormPlanValues,
-    formikHelpers: FormikHelpers<PlanValues>
-  ) => {
+  const handleSubmit = async (values: FormPlanValues) => {
     if (isEditing) {
       const { id, ...updateValues } = normalizeProduct(values);
       const {
         data: {
-          updateProduct: { data, error },
+          updateProduct: { data },
         },
       } = await updatePlan({
         variables: { id: Number(id), data: updateValues },
@@ -461,7 +450,7 @@ const FormPlan: FC<IFormProduct> = ({
       validateOnBlur
       innerRef={formRef}
     >
-      {({ values, resetForm, setFieldValue, errors, submitForm }) => {
+      {({ values, setFieldValue, submitForm }) => {
         return (
           <Modal
             width={'100%'}

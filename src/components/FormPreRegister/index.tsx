@@ -1,6 +1,6 @@
 import { FormikFormProps } from 'formik';
 import { FC } from 'react';
-import { MdEmail, MdFactCheck } from 'react-icons/md';
+import { MdEmail } from 'react-icons/md';
 import Router from 'next/router';
 import { Radio } from 'formik-antd';
 import {
@@ -10,10 +10,7 @@ import {
   StyledCancelButton,
   StyledInput,
   StyledSaveButton,
-  StyledSelect,
 } from './style';
-import roles from '../../utils/roles';
-import { rolesPT } from '../../pages/gerenciamento-usuarios';
 
 interface IFormPreRegister extends FormikFormProps {
   loading?: boolean;
