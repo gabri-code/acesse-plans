@@ -3,11 +3,9 @@ import { gql } from '@apollo/client';
 export const GET_ADDITIONAL_ITEMS_QUERY = gql`
   query GetAdditional {
     getAdditional {
-      data {
-        icon
-        name
-        id
-      }
+      id
+      icon
+      name
     }
   }
 `;

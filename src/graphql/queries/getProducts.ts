@@ -12,7 +12,7 @@ export const GET_PRODUCTS_QUERY = gql`
       active
       installationFidelity
       installationNormal
-      plan
+      title
       price
       promotionalPrice
     }

@@ -19,12 +19,13 @@ export type FormControlProps = Omit<ChakraFormControlProps, 'label'> & {
   hideError?: boolean;
   children?: ReactNode;
   formLabelProps?: FormLabelProps;
+  value?: string;
 };
 
 export const FormControl = (props: FormControlProps) => {
   const {
     error,
-    my = 4,
+    mb = 4,
     label,
     children,
     hideError,
@@ -32,12 +33,13 @@ export const FormControl = (props: FormControlProps) => {
     formLabelProps,
     onChange,
     touched,
+    value,
     ...rest
   } = props;
 
   return (
     <ChakraFormControl
-      my={my}
+      mb={mb}
       isInvalid={touched && !!error}
       name={name}
       {...rest}
@@ -58,10 +60,16 @@ export const FormControl = (props: FormControlProps) => {
           inputProps={{
             name,
             onChange,
+            value,
           }}
         />
       ) : (
-        <Input name={name} placeholder={rest.placeholder} onChange={onChange} />
+        <Input
+          name={name}
+          placeholder={rest.placeholder}
+          onChange={onChange}
+          value={value}
+        />
       )}
       {hideError ? null : <FormErrorMessage>{error}</FormErrorMessage>}
     </ChakraFormControl>

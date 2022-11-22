@@ -1,14 +1,13 @@
-import NextLink from 'next/link';
-import { Link, LinkProps } from '@chakra-ui/react';
+import NextLink, { LinkProps } from 'next/link';
+import { Link, LinkProps as ChakraLinkProps } from '@chakra-ui/react';
 import { FC, ReactNode } from 'react';
 
-interface NextLinkProps {
-  href: string;
+interface CustomNextLinkProps extends LinkProps {
   children: ReactNode;
-  linkProps?: LinkProps;
+  linkProps?: ChakraLinkProps;
 }
 
-export const CustomNextLink: FC<NextLinkProps> = ({
+export const CustomNextLink: FC<CustomNextLinkProps> = ({
   href,
   children,
   linkProps,

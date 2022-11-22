@@ -1,12 +1,11 @@
 import { gql } from '@apollo/client';
 
 export const ADDITIONAL_ITEM_MUTATION = gql`
-  mutation CreateAdditionalItem($data: AdditionalItemInput!) {
+  mutation CreateAdditionalItem($data: AdditionalItemCreateInput!) {
     createAdditionalItem(data: $data) {
-      error {
-        message
-        field
-      }
+      id
+      icon
+      name
     }
   }
 `;

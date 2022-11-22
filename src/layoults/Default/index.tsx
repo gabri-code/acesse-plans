@@ -82,9 +82,9 @@ const DefaultLayout: FC<{ children: ReactNode; title: string }> = ({
             </Flex>
           )}
           <Flex paddingX="120px" bg="#f4f3f2" h="100%" pt="50px">
-            <Flex bg="#fff" p="15px" w="100%" borderRadius="5px">
-              {children}
-            </Flex>
+            {/* <Flex p="15px" w="100%" borderRadius="5px"> */}
+            {children}
+            {/* </Flex> */}
           </Flex>
         </GridItem>
         <GridItem area={'footer'}>Footer</GridItem>

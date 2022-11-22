@@ -16,7 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   //   '/gerenciamento-clientes',
   // ];
 
-  const client = useApollo(pageProps.initialApolloState);
+  const client = useApollo(pageProps);
 
   return (
     <ApolloProvider client={client}>

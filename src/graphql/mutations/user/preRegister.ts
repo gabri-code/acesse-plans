@@ -1,12 +1,13 @@
 import { gql } from '@apollo/client';
 
 export const PRE_USER_REGISTER_MUTATION = gql`
-  mutation PreUserSignUp($data: PreCreateUserInput!) {
+  mutation CreatePreUser($data: PreUserCreateInput!) {
     preSignUp(data: $data) {
-      status
       message
-      data {
-        id
+      status
+      error {
+        field
+        message
       }
     }
   }
@@ -15,32 +16,18 @@ export const PRE_USER_REGISTER_MUTATION = gql`
 export const PRE_SIGNUP_VERIFICATION_MUTATION = gql`
   mutation PreSignUpVerification($data: PreUserVerificationInput!) {
     preSignUpVerification(data: $data) {
-      status
-      message
-      field
+      error {
+        message
+        field
+      }
       data {
         id
         email
         role
+        otp
+        otpCreatedAt
+        otpExpiresAt
       }
-    }
-  }
-`;
-
-export const PRE_SIGNUP_VALIDATION_MUTATION = gql`
-  mutation SignupVerification($data: SignUpVerificationInput!) {
-    signUpVerification(data: $data) {
-      id
-      email
-      role
-    }
-  }
-`;
-
-export const RESEND_OTP_MUTATION = gql`
-  mutation ReSendOTP($data: PreUserVerificationInput!) {
-    reSendValidationCode(data: $data) {
-      id
     }
   }
 `;

@@ -20,8 +20,10 @@ import { MdOutlineArrowRightAlt } from 'react-icons/md';
 import { FormControl } from '../../components/FormControl';
 import { AuthContext } from '../../contexts/AuthContext';
 import { USER_BY_EMAIL_QUERY } from '../../graphql/queries/user/getByEmail';
-import { UserLogin } from '../../types';
 import { CustomNextLink } from '../../components/NextLink';
+import { SignInUserInput } from '../../types/inputs/SignIn';
+import { User } from '../../types';
+
 interface FormValues {
   email: string;
   password: string;
@@ -35,7 +37,7 @@ const initialValues: FormValues = {
 const SignInPage = () => {
   const { signIn, user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
-  const [getUser] = useLazyQuery(USER_BY_EMAIL_QUERY);
+  const [getUser] = useLazyQuery<User>(USER_BY_EMAIL_QUERY);
   const [loginSuccess, setLoginSuccess] = useState(false);
 
   const [isLargerThan800] = useMediaQuery('(min-width: 811px)');
@@ -66,7 +68,7 @@ const SignInPage = () => {
   });
 
   const onSubmit = async (
-    values: UserLogin,
+    values: SignInUserInput,
     { setErrors }: FormikHelpers<FormValues>
   ) => {
     setLoading(true);

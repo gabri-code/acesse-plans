@@ -7,9 +7,12 @@ import { setContext } from '@apollo/client/link/context';
 import { parseCookies } from 'nookies';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
+import { isEqual, merge } from 'lodash';
 // import WebSocket from 'ws';
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
+
+export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__';
 
 const createApolloClient = (ctx?: GetServerSidePropsContext) => {
   const httpLink = new HttpLink({
@@ -54,12 +57,14 @@ const createApolloClient = (ctx?: GetServerSidePropsContext) => {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: authLink.concat(link),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      addTypename: false,
+    }),
   });
 };
 
 export function initializeApollo(
-  initialState = {},
+  initialState: NormalizedCacheObject = {},
   ctx?: GetServerSidePropsContext
 ) {
   // serve para verificar se já existe uma instância, para não criar outra.
@@ -67,7 +72,21 @@ export function initializeApollo(
 
   // se ja existe um estado inicial ele restaura para dentro do global (recupera os dados de cache)
   if (initialState) {
-    apolloClientGlobal.cache.restore(initialState);
+    const existingCache = apolloClientGlobal.extract();
+
+    // Merge the existing cache into data passed from getStaticProps/getServerSideProps
+    const data = merge(initialState, existingCache, {
+      // combine arrays using object equality (like in sets)
+      arrayMerge: (destinationArray: any, sourceArray: any) => [
+        ...sourceArray,
+        ...destinationArray.filter((d: any) =>
+          sourceArray.every((s: any) => !isEqual(d, s))
+        ),
+      ],
+    });
+
+    // Restore the cache with the merged data
+    apolloClientGlobal.cache.restore(data);
   }
 
   // se estiver no ssr retornar o apolloClientGlobal direto (sempre inicializando no SSR com cache limpo)
@@ -80,8 +99,20 @@ export function initializeApollo(
   return apolloClient;
 }
 
-// utilizano um memorize para caso o initialState nao mudar nao ficar reinicializando
-export function useApollo(initialState = {}) {
-  const store = useMemo(() => initializeApollo(initialState), [initialState]);
+export function addApolloState(
+  client: ApolloClient<NormalizedCacheObject>,
+  pageProps: any
+) {
+  if (pageProps?.props) {
+    pageProps.props[APOLLO_STATE_PROP_NAME] = client.cache.extract();
+  }
+
+  return pageProps;
+}
+
+// utilizando um memorize para caso o initialState nao mudar nao ficar reinicializando
+export function useApollo(pageProps: any) {
+  const state = pageProps[APOLLO_STATE_PROP_NAME];
+  const store = useMemo(() => initializeApollo(state), [state]);
   return store;
 }

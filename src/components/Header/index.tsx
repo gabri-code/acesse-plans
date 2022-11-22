@@ -36,6 +36,7 @@ const Header: FC = ({}) => {
       pos="fixed"
       paddingX="20px"
       bg="#fff"
+      zIndex={997}
     >
       <Center w="100px">
         <Img src="images/indicash.svg" alt="logo indicash" w="100%" />
