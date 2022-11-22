@@ -17,7 +17,7 @@ import type {
 } from 'next';
 import { MdEditNote } from 'react-icons/md';
 import { useEffect, useState } from 'react';
-import DefaultLayout from '../../layoults/Default';
+import DefaultLayout from '../../layouts/Default';
 import { NewUserButton, TableWraper } from '../../styles/UserManagers';
 import { AdditionalItem, Product, UserResponse } from '../../types';
 import { requireAuthentication } from '../../utils/requireAuthentication';

@@ -36,7 +36,7 @@ import {
 import { createColumnHelper, PaginationState } from '@tanstack/react-table';
 import { useEffect, useMemo, useState } from 'react';
 import { GET_ALL_USERS_QUERY } from '../../graphql/queries/user/getAll';
-import DefaultLayout from '../../layoults/Default';
+import DefaultLayout from '../../layouts/Default';
 import { PreUser, RolesPT, User } from '../../types';
 import { requireAuthentication } from '../../utils/requireAuthentication';
 import { GET_PRE_USERS_QUERY } from '../../graphql/queries/user/getPreUsers';
@@ -58,11 +58,7 @@ export interface IPageProps {
   preUsers: PreUser[];
 }
 
-const UsersManager: NextPage<IPageProps> = ({
-  title,
-  // users,
-  user: currUser,
-}) => {
+const UsersManager: NextPage<IPageProps> = ({ title, user: currUser }) => {
   const [
     { pageIndex: preUserPageIndex, pageSize: preUserPageSize },
     setPreUserPagination,
@@ -145,79 +141,6 @@ const UsersManager: NextPage<IPageProps> = ({
   const usersWithoutMe = usersData?.getAllUsers.data.filter(
     (user) => user.id !== currUser.id
   );
-
-  // const preUsersColumns: ColumnsType<DataTypePreUser> = [
-  //   {
-  //     title: 'E-mail',
-  //     dataIndex: 'email',
-  //     key: 'email',
-  //     render: (text: string) => <a>{text}</a>,
-  //   },
-  //   {
-  //     title: 'Função',
-  //     dataIndex: 'role',
-  //     key: 'role',
-  //     render: (role: Role) => (
-  //       <Tag color="blue" key={role}>
-  //         {role}
-  //       </Tag>
-  //     ),
-  //   },
-  //   {
-  //     title: 'Ação',
-  //     key: 'action',
-  //     width: '200px',
-  //     render: () => (
-  //       <Space size="middle">
-  //         <Button
-  //           leftIcon={
-  //             <MdEditNote
-  //               size={15}
-  //               style={{
-  //                 marginRight: 5,
-  //               }}
-  //             />
-  //           }
-  //           size="sm"
-  //           style={{
-  //             background: '#dea74f',
-  //             border: 'none',
-  //             display: 'flex',
-  //             alignItems: 'center',
-  //           }}
-  //         >
-  //           Reenviar código de registro
-  //         </Button>
-  //         <Button
-  //           type="primary"
-  //           icon={
-  //             <MdDeleteOutline
-  //               size={15}
-  //               style={{
-  //                 marginRight: 5,
-  //               }}
-  //             />
-  //           }
-  //           size="middle"
-  //           style={{
-  //             background: '#aa3838',
-  //             border: 'none',
-  //             display: 'flex',
-  //             alignItems: 'center',
-  //           }}
-  //         >
-  //           Remover
-  //         </Button>
-  //       </Space>
-  //     ),
-  //   },
-  // ];
-
-  // const preUsersData: DataTypePreUser[] = preUsers.map((user) => ({
-  //   key: user.id,
-  //   email: user.email,
-  //   role: rolesPT[user.role] as Role,
-  // }));
 
   const preUserColumnHelper = createColumnHelper<PreUser>();
 

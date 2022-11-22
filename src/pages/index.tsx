@@ -29,7 +29,7 @@ import {
 } from '@apollo/client';
 import { requireAuthentication } from '../utils/requireAuthentication';
 import { UserResponse } from '../types';
-import DefaultLayoult from '../layoults/Default';
+import DefaultLayoult from '../layouts/Default';
 import {
   StyledContentTitle,
   StyledFilterItem,
