@@ -1,248 +1,206 @@
 import { ApolloClient, NormalizedCacheObject, useQuery } from '@apollo/client';
-import {
-  Avatar,
-  Button,
-  Divider,
-  Space,
-  Table,
-  Tabs,
-  Tooltip,
-  Typography,
-} from 'antd';
-import { ColumnsType } from 'antd/lib/table';
 import type {
   GetServerSideProps,
   GetServerSidePropsContext,
   NextPage,
 } from 'next';
-import { MdEditNote } from 'react-icons/md';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { createColumnHelper } from '@tanstack/react-table';
+import {
+  Badge,
+  Button,
+  Center,
+  Divider,
+  Flex,
+  IconButton,
+  Image,
+  Tab,
+  TableContainer,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  Tooltip,
+  useDisclosure,
+  VStack,
+} from '@chakra-ui/react';
+import { MdAdd, MdDelete, MdEdit, MdRemove } from 'react-icons/md';
 import DefaultLayout from '../../layouts/Default';
-import { NewUserButton, TableWraper } from '../../styles/UserManagers';
-import { AdditionalItem, Product, UserResponse } from '../../types';
+import { AdditionalItem, Product, User } from '../../types';
 import { requireAuthentication } from '../../utils/requireAuthentication';
-import { FormPlan } from '../../components/FormProduct';
 import { GET_ADDITIONAL_ITEMS_QUERY } from '../../graphql/queries/getAdditionalItems';
 import { GET_PRODUCTS_QUERY } from '../../graphql/queries/getProducts';
-
-export const rolesPT = {
-  admin: 'Administrador',
-  manager: 'Gerente',
-  indicator: 'Indicador',
-  test: 'Teste',
-};
+import {
+  GetAdditionalItemsData,
+  GetProductsData,
+} from '../../types/queries/Product';
+import { DataTable } from '../../components/DataTable';
+import { FormPlan } from '../../components/FormProduct';
 
 export interface IPageProps {
   title: string;
-  user: UserResponse;
+  user: User;
   additionalItems: AdditionalItem[];
 }
 
-interface DataTypePlan {
-  key: number;
-  plan: string;
-  price: number;
-  promotionalPrice?: number;
-  additionalItems?: AdditionalItem[];
-  installationNormal: number;
-  installationFidelity: number;
-  active: boolean;
-}
+const formatCurrencyBRL = (value: number) => `${value.toFixed(2)}`;
 
-const ProductsManager: NextPage<IPageProps> = ({
-  title,
-  additionalItems,
-  user: currUser,
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const ProductsManager: NextPage<IPageProps> = ({ title, additionalItems }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [productToEdit, setProductToEdit] = useState<Product>();
 
-  const { data, refetch, loading } = useQuery(GET_PRODUCTS_QUERY);
+  const {
+    isOpen: isOpenModalNet,
+    onOpen: openModalNet,
+    onClose: closeModalNet,
+  } = useDisclosure();
 
-  useEffect(() => {
-    if (data) {
-      const { getProducts } = data;
-
-      setProducts(getProducts);
-    }
-  }, [data]);
-
-  const handleModalOpen = (value: boolean) => setIsModalOpen(value);
+  const {
+    data: getProductsData,
+    refetch,
+    loading,
+  } = useQuery<GetProductsData>(GET_PRODUCTS_QUERY);
 
   const handleEditing = (value: boolean) => setIsEditing(value);
 
   const handleEdit = (product: Product) => {
     handleEditing(true);
-    console.log(product);
     setProductToEdit(product);
-    handleModalOpen(true);
+    openModalNet();
   };
 
-  const columns: ColumnsType<DataTypePlan> = [
-    {
-      dataIndex: 'plan',
-      key: 'plan',
-      title: 'Plano',
-      // align: 'center',
-      width: '100%',
-      render: (text: string, item: DataTypePlan) =>
-        !item.active ? (
-          <Typography.Text>
-            {text} &nbsp;
-            <Typography.Text strong>(Plano inativo)</Typography.Text>
-          </Typography.Text>
-        ) : (
-          <Typography.Text>{text}</Typography.Text>
-        ),
-    },
-    {
-      title: 'Pacotes Inclusos',
-      dataIndex: 'additionalItems',
-      width: '100%',
-      key: 'additional',
-      render: (items: AdditionalItem[]) => {
-        return (
-          <Space>
-            {items.map((item) => (
-              <Tooltip key={item.id} title={item.name}>
-                <Avatar src={item.icon} shape="square" />
-              </Tooltip>
-            ))}
-          </Space>
-        );
-      },
-    },
-    {
-      title: 'Preço',
-      dataIndex: 'price',
-      width: '100%',
-      key: 'price',
-      render: (price: number, item: DataTypePlan) => {
-        return item.promotionalPrice ? (
-          <Space>
-            <Typography.Text delete>{price.toFixed(2)}</Typography.Text>
-            <Typography.Text type="danger">
-              {item.promotionalPrice?.toFixed(2)}
-            </Typography.Text>
-          </Space>
-        ) : (
-          <Typography.Text>{price.toFixed(2)}</Typography.Text>
-        );
-      },
-    },
-    {
-      title: (
-        <Space direction="vertical">
-          Custo de instalação
-          <Space
-            style={{
-              height: 8,
-            }}
-          >
-            Normal <Divider orientation="center" /> Fidelidade
-          </Space>
-        </Space>
-      ),
-      dataIndex: 'installationNormal',
-      width: 300,
-      key: 'installationNormal',
-      render: (installationNormal: number, item: DataTypePlan) => (
-        <Space align="center">
-          <Typography.Text>{installationNormal.toFixed(2)}</Typography.Text>
-          <Divider orientation="center" />
-          <Typography.Text>
-            {item.installationFidelity?.toFixed(2)}
-          </Typography.Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Ação',
-      key: 'action',
-      width: '100%',
-      render: (value, product) => (
-        <Space size="middle">
-          <Button
-            type="primary"
-            icon={<MdEditNote size={15} />}
-            size="middle"
-            style={{
-              background: '#dea74f',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-            onClick={() =>
-              handleEdit(
-                products.find((value) => value.id === product.key) as Product
-              )
-            }
-          >
-            Editar
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+  const productColumnHelper = createColumnHelper<Product>();
 
-  const dataSource: DataTypePlan[] = products?.map((product) => ({
-    key: product.id,
-    installationFidelity: product.installationFidelity,
-    installationNormal: product.installationNormal,
-    plan: product.plan,
-    price: product.price,
-    active: product.active,
-    additionalItems: product.additionalItems,
-    promotionalPrice: product.promotionalPrice,
-  }));
+  const productColumns = [
+    productColumnHelper.accessor((row) => row, {
+      cell: (info) => (
+        <Flex>
+          <Text as="b" mr="5px">
+            {info.getValue().title}
+          </Text>{' '}
+          {info.getValue().active ? (
+            <Badge colorScheme="green">ativo</Badge>
+          ) : (
+            <Badge>inativo</Badge>
+          )}
+        </Flex>
+      ),
+      header: 'Título',
+    }),
+    productColumnHelper.accessor('additionalItems', {
+      cell: (info) => (
+        <Flex gap="5px">
+          {info.getValue()?.map((item) => (
+            <Tooltip key={item.id} label={item.name}>
+              <Image src={item.icon} alt={item.name} w="25px" />
+            </Tooltip>
+          ))}
+        </Flex>
+      ),
+      header: 'Serviços Adicionais',
+    }),
+    productColumnHelper.accessor((row) => row, {
+      cell: (info) => (
+        <Flex gap="5px">
+          <Text as="del">{formatCurrencyBRL(info.getValue().price)}</Text>
+          {info.getValue().promotionalPrice && (
+            <Text fontFamily="Gilroy-Medium" color="red.600">
+              {formatCurrencyBRL(info.getValue().promotionalPrice as number)}
+            </Text>
+          )}
+        </Flex>
+      ),
+      header: 'Preço',
+    }),
+    productColumnHelper.accessor((row) => row, {
+      cell: (info) => (
+        <Flex gap="5px">
+          <VStack>
+            <Text as="b" fontSize="12px">
+              FIDELIDADE
+            </Text>
+            <Text>
+              {formatCurrencyBRL(
+                info.getValue().installationFidelity as number
+              )}
+            </Text>
+          </VStack>
+          <Center h="50px">
+            <Divider orientation="vertical" />
+          </Center>
+          <VStack>
+            <Text as="b" fontSize="12px">
+              SEM FIDELIDADE
+            </Text>
+            <Text>
+              {formatCurrencyBRL(info.getValue().installationNormal as number)}
+            </Text>
+          </VStack>
+        </Flex>
+      ),
+      header: 'Instalação',
+    }),
+    productColumnHelper.display({
+      id: 'actions',
+      cell: (props) => (
+        <Flex gap="5px">
+          <Button
+            size="sm"
+            colorScheme="yellow"
+            variant="outline"
+            leftIcon={<MdEdit size={18} />}
+            onClick={() => {
+              handleEdit(props.row.original);
+            }}
+          >
+            EDITAR
+          </Button>
+        </Flex>
+      ),
+    }),
+  ];
 
   return (
     <DefaultLayout title={title}>
-      <Tabs
-        defaultActiveKey="1"
-        // onChange={onChange}
-        items={[
-          {
-            label: `Planos de Internet`,
-            key: '1',
-            children: (
-              <TableWraper direction="vertical">
-                <NewUserButton
-                  type="primary"
-                  // icon={<MdAdd />}
-                  size="large"
-                  onClick={() => handleModalOpen(true)}
+      <Flex bg="#fff" w="100%" p="10px" borderRadius="5px">
+        <Tabs variant="soft-rounded" colorScheme="orange">
+          <TabList>
+            <Tab>Planos de Internet</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <TableContainer>
+                <Button
+                  leftIcon={<MdAdd size={18} />}
+                  colorScheme="cyan"
+                  size="sm"
+                  onClick={openModalNet}
                 >
-                  Cadastrar plano
-                </NewUserButton>
+                  ADICIONAR
+                </Button>
+                <DataTable
+                  data={getProductsData?.getProducts ?? []}
+                  columns={productColumns}
+                />
+              </TableContainer>
+              {isOpenModalNet && (
                 <FormPlan
-                  handleModalOpen={handleModalOpen}
-                  isModalOpen={isModalOpen}
-                  additionalItems={additionalItems}
+                  closeModal={closeModalNet}
+                  openModal={openModalNet}
+                  isModalOpen={isOpenModalNet}
                   handleEditing={handleEditing}
+                  productToEdit={productToEdit}
                   isEditing={isEditing}
-                  productToEdit={isEditing ? productToEdit : undefined}
                   refetchProducts={refetch}
+                  additionalItems={additionalItems}
                 />
-                <Table
-                  columns={columns}
-                  dataSource={dataSource}
-                  loading={loading}
-                  pagination={false}
-                  scroll={{ x: 240 }}
-                />
-              </TableWraper>
-            ),
-          },
-          {
-            label: `Planos de TV`,
-            key: '2',
-            children: `Content of Tab Pane 2`,
-          },
-        ]}
-      />
+              )}
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </Flex>
     </DefaultLayout>
   );
 };
@@ -252,20 +210,36 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   return requireAuthentication(
     context,
-    async (client: ApolloClient<NormalizedCacheObject>, user: UserResponse) => {
-      const {
-        data: {
-          getAdditional: { data },
-        },
-      } = await client.query({ query: GET_ADDITIONAL_ITEMS_QUERY });
-
-      return {
-        props: {
-          title: 'Gerenciamento de Produtos',
-          additionalItems: data,
-          user,
-        },
+    async (client: ApolloClient<NormalizedCacheObject>, user: User) => {
+      const defaultProps = {
+        title: 'Gerenciamento de Produtos',
+        additionalItems: [],
+        user,
       };
+
+      try {
+        const {
+          data: { getAdditional },
+        } = await client.query<GetAdditionalItemsData>({
+          query: GET_ADDITIONAL_ITEMS_QUERY,
+        });
+
+        console.log(getAdditional);
+
+        return {
+          props: {
+            ...defaultProps,
+            additionalItems: getAdditional,
+          },
+        };
+      } catch (e) {
+        console.log(e);
+        return {
+          props: {
+            props: defaultProps,
+          },
+        };
+      }
     }
   );
 };

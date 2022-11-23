@@ -1,20 +1,20 @@
-import { InputProps } from 'formik-antd';
+import { Input, InputProps } from '@chakra-ui/react';
 import { ChangeEvent, FC, FormEvent, useCallback, useState } from 'react';
-import { StyledInput } from './style';
 
 interface InputMaskProps extends InputProps {
   mask: 'cpf' | 'phone' | 'cep' | 'bank' | 'birth' | 'currency';
-  setFieldValue: (
-    field: string,
-    value: any,
-    shouldValidate?: boolean | undefined
-  ) => void;
+  // setFieldValue: (
+  //   field: string,
+  //   value: any,
+  //   shouldValidate?: boolean | undefined
+  // ) => void;
 }
 
 export const InputMask: FC<InputMaskProps> = ({
   mask,
-  name,
-  setFieldValue,
+  name = '',
+  // setFieldValue,
+  onChange,
   ...props
 }) => {
   const [inputValue, setInputValue] = useState('');
@@ -30,17 +30,18 @@ export const InputMask: FC<InputMaskProps> = ({
   );
 
   const handleCurrencyInput = useCallback(
-    ({ currentTarget }: FormEvent<HTMLInputElement>) => {
-      let value = currentTarget.value;
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.currentTarget.value;
 
-      value = value
+      e.currentTarget.value = value
         .replace(/\D/g, '')
         .replace(/\D/g, ' ')
         .replace(/(\d)(\d{2})$/, '$1.$2')
         .replace(/(?=(\d{3})+(\D))\B/g, ' ');
-      setFieldValue(name, value);
+
+      if (onChange) onChange(e);
     },
-    [name, setFieldValue]
+    [onChange]
   );
 
   const handleBirthDateInput = useCallback(
@@ -119,11 +120,11 @@ export const InputMask: FC<InputMaskProps> = ({
   // };
 
   return (
-    <StyledInput
+    <Input
       {...props}
       // value={inputValue}
       name={name}
-      onKeyUp={callMaskFunction}
+      onChange={callMaskFunction}
       onKeyDown={(e) => {
         const isNumber = Number(e.key);
 

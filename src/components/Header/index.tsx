@@ -12,12 +12,6 @@ import {
   MenuItem,
   MenuList,
 } from '@chakra-ui/react';
-import {
-  StyledBadgeNotification,
-  StyledBadgeUser,
-  StyledHeader,
-  StyledPageTitle,
-} from './style';
 import { AuthContext } from '../../contexts/AuthContext';
 
 const Header: FC = ({}) => {

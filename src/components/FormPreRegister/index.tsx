@@ -152,12 +152,7 @@ const FormPreRegister: FC<FormPreRegisterProps> = ({
                 {roles.map((value) => {
                   const radio = getRadioProps({ value });
                   return (
-                    <RadioCard
-                      key={value}
-                      name="role"
-                      handleChange={handleChange}
-                      {...radio}
-                    >
+                    <RadioCard key={value} name="role" type="radio" {...radio}>
                       {rolesPT[value as keyof RolesPT]}
                     </RadioCard>
                   );

@@ -1,23 +1,13 @@
 import { Formik, FormikFormProps, FormikProps } from 'formik';
-import { FC, ReactElement, useEffect, useRef, useState } from 'react';
-import { Checkbox, Select } from 'formik-antd';
 import {
-  Avatar,
-  Button,
-  Col,
-  Divider,
-  message,
-  Modal,
-  Row,
-  Space,
-  UploadProps,
-} from 'antd';
-import {
-  ArrowDownOutlined,
-  LoadingOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
-import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload';
+  ChangeEvent,
+  FC,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { RcFile } from 'antd/lib/upload';
 import * as yup from 'yup';
 import {
   ApolloQueryResult,
@@ -25,9 +15,28 @@ import {
   useMutation,
   useSubscription,
 } from '@apollo/client';
-import { MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import { isEqual } from 'lodash';
-import { Container, StyledInput, StyledTextField, StyledUpload } from './style';
+import {
+  Button,
+  Flex,
+  IconButton,
+  Image,
+  Input,
+  Checkbox,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  useCheckboxGroup,
+  useDisclosure,
+  useToast,
+  VStack,
+} from '@chakra-ui/react';
 import { InputMask } from '../InputMask';
 import { NEW_ADDITIONAL_SUBSCRIPTION } from '../../graphql/subscriptions/newAdditional';
 import { AdditionalItem, Product } from '../../types';
@@ -35,13 +44,18 @@ import { CREATE_PRODUCT_MUTATION } from '../../graphql/mutations/product/createP
 import { ADDITIONAL_ITEM_MUTATION } from '../../graphql/mutations/product/additionalItem';
 import { UPDATE_PRODUCT_MUTATION } from '../../graphql/mutations/product/updateProduct';
 import { DELETE_PRODUCT_MUTATION } from '../../graphql/mutations/product/deleteProduct';
+import { OnNewAdditionalData } from '../../types/queries/Product';
+import { FormControl } from '../FormControl';
+import { CreateProductData } from '../../types/mutations/Product';
+import CustomCheckbox from '../CustomCheckbox';
 
 interface IFormProduct extends FormikFormProps {
   loading?: boolean;
   isModalOpen: boolean;
-  handleModalOpen: (value: boolean) => void;
-  handleEditing: (value: boolean) => void;
-  additionalItems: AdditionalItem[];
+  openModal: () => void;
+  closeModal: () => void;
+  handleEditing?: (value: boolean) => void;
+  additionalItems?: AdditionalItem[];
   isEditing?: boolean;
   productToEdit?: Product;
   refetchProducts: (
@@ -50,13 +64,14 @@ interface IFormProduct extends FormikFormProps {
 }
 
 interface PlanValues {
-  plan: string;
+  title: string;
   price: string;
   promotionalPrice?: string;
   active: boolean;
   additionalItems: number[];
   installationNormal: string;
   installationFidelity: string;
+  type: 'internet' | 'tv' | 'others';
 }
 
 const getBase64 = (img: RcFile, callback: (url: string) => void) => {
@@ -65,38 +80,50 @@ const getBase64 = (img: RcFile, callback: (url: string) => void) => {
   reader.readAsDataURL(img);
 };
 
-const AdditionalItem = ({
-  additionalItems,
-  defaultSelected,
-}: {
-  additionalItems: AdditionalItem[];
-  defaultSelected?: number[];
-  setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
+interface FormPlanValues extends PlanValues {
+  id?: number;
+}
+
+interface AdditionalValues {
+  icon: string;
+  name: string;
+}
+
+const FormPlan: FC<IFormProduct> = ({
+  isModalOpen,
+  openModal,
+  closeModal,
+  additionalItems = [],
+  isEditing,
+  handleEditing,
+  productToEdit,
+  refetchProducts,
+  ...props
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [options, setOptions] = useState(additionalItems);
+  const [childKey, setChildKey] = useState(1);
 
-  interface AdditionalValues {
-    icon: string;
-    name: string;
-  }
+  useEffect(() => {
+    setChildKey((prev) => prev + 1);
+  }, []);
 
-  const initialValues = {
-    icon: '',
-    name: '',
-  };
+  const [productChanged, setProductChanged] = useState(false);
 
-  const Schema = yup.object().shape({
-    name: yup.string().required('Campo obrigatório'),
-    icon: yup.string().required('Campo obrigatório'),
-  });
-
-  const { data } = useSubscription(NEW_ADDITIONAL_SUBSCRIPTION);
+  const [updatePlan, { loading: loadingUpdate }] = useMutation(
+    UPDATE_PRODUCT_MUTATION
+  );
+  const [deletePlan, { loading: loadingDelete }] = useMutation(
+    DELETE_PRODUCT_MUTATION
+  );
 
   const [addItem, { loading: newItemLoading }] = useMutation(
     ADDITIONAL_ITEM_MUTATION
+  );
+
+  const [additionalServices, setAdditionalServices] =
+    useState<AdditionalItem[]>(additionalItems);
+
+  const { data } = useSubscription<OnNewAdditionalData>(
+    NEW_ADDITIONAL_SUBSCRIPTION
   );
 
   useEffect(() => {
@@ -104,33 +131,12 @@ const AdditionalItem = ({
       const {
         newAdditional: { data: items },
       } = data;
-      setOptions(items);
+      setAdditionalServices(items);
     }
   }, [data]);
 
-  const additionalRef = useRef<FormikProps<AdditionalValues>>(null);
-
-  const handleChange: UploadProps['onChange'] = (
-    info: UploadChangeParam<UploadFile>
-  ) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as RcFile, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-        setDropdownOpen(true);
-        additionalRef.current?.setFieldValue('icon', url);
-      });
-    }
-  };
-
-  const uploadButton = (
-    <div>{loading ? <LoadingOutlined /> : <PlusOutlined />}</div>
-  );
+  const additionalFormRef =
+    useRef<FormikProps<{ icon: string; name: string }>>(null);
 
   const handleNewAdditional = async (values: AdditionalValues) => {
     const {
@@ -144,205 +150,56 @@ const AdditionalItem = ({
     });
 
     if (error) {
-      additionalRef.current?.setFieldError(error.field, error.message);
+      additionalFormRef.current?.setFieldError(error.field, error.message);
       return;
     }
+
+    additionalFormRef.current?.resetForm();
   };
 
-  const selectRef = useRef<HTMLDivElement>(null);
-  const selectBodyRef = useRef<HTMLDivElement>(null);
+  const {
+    isOpen: isOpenNewAdditional,
+    onOpen: openModalNewAdditional,
+    onClose: closeModalNewAdditional,
+  } = useDisclosure();
 
-  useEffect(() => {
-    /**
-     * Alert if clicked on outside of element
-     */
-    function handleClickOutside(event: any) {
-      if (selectRef && selectBodyRef) {
-        if (
-          selectBodyRef.current &&
-          !selectBodyRef?.current?.contains(event.target) &&
-          selectRef.current &&
-          !selectRef.current.contains(event.target)
-        ) {
-          setDropdownOpen(false);
-        }
-      }
-    }
-    // Bind the event listener
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  const handleOpenNewAdditionalModal = () => openModalNewAdditional();
+  const handleCloseNewAdditionalModal = () => closeModalNewAdditional();
 
-  return (
-    <div ref={selectRef}>
-      <Select
-        name="additionalItems"
-        mode="multiple"
-        filterOption={(input, option) => {
-          const label = option?.label as ReactElement;
-          return label.props.children[1]
-            .toLowerCase()
-            .includes(input.toLowerCase());
-        }}
-        style={{ width: '100%' }}
-        size="large"
-        placeholder="Selecione os adicionais desse plano, se houver."
-        notFoundContent="Adicione um item"
-        suffixIcon={<ArrowDownOutlined />}
-        onClick={() => setDropdownOpen(true)}
-        defaultValue={defaultSelected}
-        open={dropdownOpen}
-        dropdownRender={(menu) => (
-          <div ref={selectBodyRef}>
-            {menu}
-            <Divider style={{ margin: '8px 0' }} />
-            <Formik
-              initialValues={initialValues}
-              onSubmit={handleNewAdditional}
-              innerRef={additionalRef}
-              validationSchema={Schema}
-            >
-              {({ submitForm }) => (
-                <Row
-                  gutter={8}
-                  onClick={() => {
-                    // setDropdownOpen(true);
-                  }}
-                  style={{
-                    // height: '40px',
-                    width: '100%',
-                    padding: '0 10px',
-                  }}
-                >
-                  <Col
-                    style={{
-                      height: '100%',
-                    }}
-                  >
-                    <Container.Item name="icon" label="Ícone">
-                      <StyledUpload
-                        name="icon"
-                        listType="picture-card"
-                        className="avatar-uploader"
-                        showUploadList={false}
-                        onChange={handleChange}
-                      >
-                        {imageUrl ? (
-                          <Avatar shape="square" src={imageUrl} alt="avatar" />
-                        ) : (
-                          uploadButton
-                        )}
-                      </StyledUpload>
-                    </Container.Item>
-                  </Col>
-                  <Col
-                    style={{
-                      height: '100%',
-                      flex: 1,
-                    }}
-                  >
-                    <Container.Item name="name" label="Título">
-                      <StyledInput name="name" />
-                    </Container.Item>
-                  </Col>
-                  <Col
-                    style={
-                      {
-                        // height: '100%',
-                      }
-                    }
-                  >
-                    <Container.Item name="ad">
-                      <Button
-                        icon={<PlusOutlined />}
-                        onClick={submitForm}
-                        loading={newItemLoading}
-                        type="primary"
-                        style={{
-                          height: 40,
-                          width: 40,
-                        }}
-                      />
-                    </Container.Item>
-                  </Col>
-                </Row>
-              )}
-            </Formik>
-          </div>
-        )}
-        options={options.map((item) => ({
-          label: (
-            <Space>
-              <Avatar src={item.icon} size={25} shape="square" />
-              {item.name}
-            </Space>
-          ),
-          value: item.id,
-        }))}
-      />
-    </div>
-  );
-};
-
-const onRegisterSuccess = (messageValue: string) => {
-  message.success(messageValue);
-};
-
-interface FormPlanValues extends PlanValues {
-  id?: number;
-}
-
-const FormPlan: FC<IFormProduct> = ({
-  isModalOpen,
-  handleModalOpen,
-  additionalItems,
-  isEditing,
-  handleEditing,
-  productToEdit,
-  refetchProducts,
-  ...props
-}) => {
-  const [updatePlan] = useMutation(UPDATE_PRODUCT_MUTATION);
-  const [deletePlan, { loading: loadingDelete }] = useMutation(
-    DELETE_PRODUCT_MUTATION
-  );
-
-  let normalizedProductToEdit: FormPlanValues | null;
+  let normalizedProductToEdit: FormPlanValues | null = null;
 
   const formRef = useRef<FormikProps<FormPlanValues>>(null);
 
   if (productToEdit) {
-    const { __typename: _, ...rest } = productToEdit;
-
     normalizedProductToEdit = {
-      ...rest,
+      ...productToEdit,
       price: productToEdit.price.toFixed(2),
-      promotionalPrice: productToEdit.promotionalPrice.toFixed(2),
-      installationNormal: productToEdit.installationNormal.toFixed(2),
-      installationFidelity: productToEdit.installationFidelity.toFixed(2),
-      additionalItems: productToEdit.additionalItems.map((item) => item.id),
+      promotionalPrice: productToEdit.promotionalPrice?.toFixed(2),
+      installationNormal: productToEdit.installationNormal?.toFixed(2) ?? '',
+      installationFidelity:
+        productToEdit.installationFidelity?.toFixed(2) ?? '',
+      additionalItems:
+        productToEdit.additionalItems?.map((item) => item.id) ?? [],
     };
-
-    console.log(productToEdit);
-
-    formRef.current?.setValues(normalizedProductToEdit);
   }
 
-  const initialValues: FormPlanValues = {
-    plan: '',
+  const defaultInitialValues: FormPlanValues = {
+    title: '',
     active: true,
     additionalItems: [],
     price: '',
     promotionalPrice: '',
     installationNormal: '',
     installationFidelity: '',
+    type: 'internet',
   };
 
+  const initialValues = (
+    isEditing ? normalizedProductToEdit : defaultInitialValues
+  ) as FormPlanValues;
+
   const Schema = yup.object({
-    plan: yup.string().required('Campo obrigatório.'),
+    title: yup.string().required('Campo obrigatório.'),
     price: yup.string().required('Campo obrigatório.'),
     promotionalPrice: yup
       .string()
@@ -350,8 +207,11 @@ const FormPlan: FC<IFormProduct> = ({
         'priceValue',
         'Preço promocional deve ser menor que o preço normal.',
         (value) => {
-          if (value) {
-            return Number(value) < Number(formRef.current?.values.price);
+          if (value && value.length >= 4) {
+            return (
+              Number(value.replaceAll(' ', '')) <
+              Number(formRef.current?.values.price.replaceAll(' ', ''))
+            );
           }
           return true;
         }
@@ -360,35 +220,63 @@ const FormPlan: FC<IFormProduct> = ({
     installationFidelity: yup.string(),
   });
 
-  const [createProduct, { loading }] = useMutation(CREATE_PRODUCT_MUTATION);
+  const [createProduct, { loading: loadingCreate }] =
+    useMutation<CreateProductData>(CREATE_PRODUCT_MUTATION);
 
   const normalizeProduct = (data: FormPlanValues) => {
-    return {
+    const { id, ...normalized }: { [key: string]: any } = {
       ...data,
-      id: Number(data.id),
       price: Number(data.price),
       promotionalPrice: Number(data.promotionalPrice),
       installationNormal: Number(data.installationNormal),
       installationFidelity: Number(data.installationFidelity),
+      additionalItems: {
+        connect: data.additionalItems.map((item) => ({
+          id: item,
+        })),
+      },
     };
+
+    if (isEditing) {
+      Object.keys(normalized).map((key) =>
+        Object.defineProperty(normalized, key, {
+          value:
+            key === 'additionalItems'
+              ? { set: normalized[key as string]['connect'] }
+              : { set: normalized[key as string] },
+        })
+      );
+    }
+
+    return { id, ...normalized };
   };
 
-  const handleCancel = () => {
-    formRef.current?.resetForm();
-    handleModalOpen(false);
+  const { getCheckboxProps } = useCheckboxGroup({
+    defaultValue: initialValues.additionalItems,
+    onChange: (value) => {
+      const form = formRef.current;
+      const parsedValue = value.map((item) => Number(item));
+      form?.setFieldValue('additionalItems', parsedValue);
+    },
+  });
 
-    if (isEditing) handleEditing(false);
-  };
+  const toast = useToast();
 
   const handleSubmit = async (values: FormPlanValues) => {
     if (isEditing) {
       const { id, ...updateValues } = normalizeProduct(values);
+      console.log(id, updateValues);
       const {
         data: {
           updateProduct: { data },
         },
       } = await updatePlan({
-        variables: { id: Number(id), data: updateValues },
+        variables: {
+          id: Number(id),
+          data: {
+            ...updateValues,
+          },
+        },
       });
 
       if (data) {
@@ -399,32 +287,43 @@ const FormPlan: FC<IFormProduct> = ({
       return;
     }
 
-    const {
-      data: {
-        createProduct: { data, error },
-      },
-    } = await createProduct({
+    const { data } = await createProduct({
       variables: {
-        data: {
-          ...values,
-          price: Number(values.price),
-          promotionalPrice: Number(values.promotionalPrice),
-          installationNormal: Number(values.installationNormal),
-          installationFidelity: Number(values.installationFidelity),
-        },
+        data: normalizeProduct(values),
       },
     });
 
-    if (error) {
-      formRef.current?.setFieldError(error.field, error.message);
+    if (data?.createProduct.error) {
+      formRef.current?.setFieldError(
+        data.createProduct.error.field as string,
+        data.createProduct.error.message
+      );
       return;
     }
 
-    if (data) {
+    if (data?.createProduct.data) {
       formRef.current?.resetForm();
-      onRegisterSuccess('Plano cadastrado com sucesso.');
+      toast({
+        title: 'Perfeito!',
+        description: 'Plano cadastrado com sucesso.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
       refetchProducts();
     }
+  };
+
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    formRef.current?.setFieldTouched(e.target.name, true);
+    formRef.current?.setFieldValue(e.target.name, e.target.value);
+  }, []);
+
+  const handleCancel = () => {
+    formRef.current?.resetForm();
+    closeModal();
+
+    if (isEditing && handleEditing) handleEditing(false);
   };
 
   const handleDelete = async () => {
@@ -442,161 +341,346 @@ const FormPlan: FC<IFormProduct> = ({
     }
   };
 
+  const inputFileRef = useRef<HTMLInputElement>(null);
+
+  const handleChangeAdditionalForm = (e: ChangeEvent<HTMLInputElement>) => {
+    additionalFormRef.current?.setFieldValue('name', e.target.value);
+    additionalFormRef.current?.setFieldTouched('name', true);
+  };
+
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={handleSubmit}
-      validationSchema={Schema}
-      validateOnBlur
-      innerRef={formRef}
+    <Modal
+      isOpen={isModalOpen}
+      onClose={closeModal}
+      scrollBehavior="inside"
+      key={childKey}
     >
-      {({ values, setFieldValue, submitForm }) => {
-        return (
-          <Modal
-            width={'100%'}
-            centered
-            closable
-            open={isModalOpen}
-            title="Cadastrar novo plano"
-            onCancel={handleCancel}
-            style={{
-              padding: '20px 0',
-              minWidth: 500,
-              maxWidth: 700,
-            }}
-            footer={null}
-            bodyStyle={{
-              overflowY: 'auto',
-              height: '100%',
-              maxHeight: '80vh',
-            }}
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Cadastrar novo plano de internet</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Formik
+            initialValues={initialValues}
+            onSubmit={handleSubmit}
+            validationSchema={Schema}
+            validateOnBlur
+            innerRef={formRef}
           >
-            <Container {...props} layout="vertical">
-              <Container.Item name="plan" label="Plano">
-                <StyledInput name="plan" prefix={<span />} />
-              </Container.Item>
-              <Row gutter={8}>
-                <Col style={{ width: '50%' }}>
-                  <Container.Item name="price" label="Preço">
-                    <InputMask
-                      setFieldValue={setFieldValue}
-                      placeholder="0,00"
-                      mask="currency"
+            {({
+              values,
+              errors,
+              touched,
+              setFieldValue,
+              setFieldTouched,
+              submitForm,
+            }) => {
+              if (isEditing) {
+                if (!isEqual(normalizedProductToEdit, values)) {
+                  setProductChanged(true);
+                } else {
+                  setProductChanged(false);
+                }
+              }
+
+              return (
+                <>
+                  <FormControl
+                    name="title"
+                    label="Título"
+                    onChange={handleChange}
+                    defaultValue=""
+                    value={values.title}
+                    error={errors.title}
+                    touched={touched.title}
+                    onBlur={() =>
+                      setFieldValue(
+                        'title',
+                        values.title
+                          .replace(/\s+/g, ' ')
+                          .trim()
+                          .replaceAll('.', '')
+                      )
+                    }
+                    isRequired
+                  />
+                  <Flex gap="10px">
+                    <FormControl
                       name="price"
-                      prefix={<span />}
-                    />
-                  </Container.Item>
-                </Col>
-                <Col style={{ width: '50%' }}>
-                  <Container.Item
-                    name="promotionalPrice"
-                    label="Preço promocional"
-                  >
-                    <InputMask
-                      setFieldValue={setFieldValue}
-                      placeholder="0,00"
-                      mask="currency"
+                      label="Preço"
+                      error={errors.price}
+                      touched={touched.price}
+                      isRequired
+                    >
+                      <InputMask
+                        onChange={handleChange}
+                        placeholder="0.00"
+                        mask="currency"
+                        name="price"
+                        value={values.price}
+                      />
+                    </FormControl>
+                    <FormControl
                       name="promotionalPrice"
-                      prefix={<span />}
-                    />
-                  </Container.Item>
-                </Col>
-              </Row>
-              <StyledTextField
-                style={{
-                  marginBottom: 10,
-                }}
-              >
-                <legend>Itens inclusos</legend>
-                <AdditionalItem
-                  additionalItems={additionalItems}
-                  setFieldValue={setFieldValue}
-                  defaultSelected={values.additionalItems}
-                />
-              </StyledTextField>
-              <StyledTextField>
-                <legend>Custo de instalação</legend>
-                <Row gutter={8}>
-                  <Col style={{ width: '50%' }}>
-                    <Container.Item
-                      name="installationNormal"
-                      label="Preço sem fidelidade"
+                      label="Preço promocional"
+                      error={errors.promotionalPrice}
+                      touched={touched.promotionalPrice}
                     >
                       <InputMask
-                        setFieldValue={setFieldValue}
-                        placeholder="0,00"
+                        placeholder="0.00"
                         mask="currency"
+                        name="promotionalPrice"
+                        value={values.promotionalPrice}
+                        onChange={handleChange}
+                      />
+                    </FormControl>
+                  </Flex>
+                  <FormControl name="additional" label="Serviços Inclusos">
+                    <Button
+                      leftIcon={<MdAdd />}
+                      size="xs"
+                      colorScheme="cyan"
+                      onClick={handleOpenNewAdditionalModal}
+                    >
+                      Novo serviço
+                    </Button>
+                    <Flex
+                      wrap="wrap"
+                      gap="10px"
+                      basis="200px"
+                      w="100%"
+                      p="10px 0"
+                    >
+                      {additionalServices &&
+                        additionalServices.map((value) => {
+                          const checkbox = getCheckboxProps({
+                            value: value.id,
+                          });
+                          return (
+                            <CustomCheckbox
+                              key={value.id}
+                              {...checkbox}
+                              borderRadius="full"
+                            >
+                              <Image
+                                src={value.icon}
+                                alt={value.name}
+                                w="25px"
+                                mr="5px"
+                              />{' '}
+                              <Text fontSize="sm" fontFamily="Gilroy-Medium">
+                                {value.name}
+                              </Text>
+                            </CustomCheckbox>
+                          );
+                        })}
+                    </Flex>
+                    <Modal
+                      isCentered
+                      onClose={handleCloseNewAdditionalModal}
+                      isOpen={isOpenNewAdditional}
+                      motionPreset="slideInBottom"
+                      closeOnOverlayClick={false}
+                    >
+                      <ModalOverlay />
+                      <ModalContent>
+                        <ModalHeader>Cadastrar novo serviço</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                          <Formik
+                            initialValues={{ icon: '', name: '' }}
+                            innerRef={additionalFormRef}
+                            onSubmit={handleNewAdditional}
+                            validationSchema={yup.object().shape({
+                              icon: yup.string().required('Campo obrigatório.'),
+                              name: yup.string().required('Campo obrigatório.'),
+                            })}
+                          >
+                            {({
+                              submitForm: additionalSubmitForm,
+                              errors: additionalErrors,
+                              values: additionalValues,
+                              touched: additionalTouched,
+                              setFieldValue: setAdditionalFieldValue,
+                              setFieldTouched: setAdditionalFieldTouched,
+                              resetForm: resetAdditional,
+                            }) => {
+                              return (
+                                <Flex>
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    display="none"
+                                    ref={inputFileRef}
+                                    onChange={(e) => {
+                                      if (e.target.files) {
+                                        //   // Get this url from response in real world.
+                                        getBase64(
+                                          e.target.files[0] as RcFile,
+                                          (url) => {
+                                            setAdditionalFieldValue(
+                                              'icon',
+                                              url
+                                            );
+                                          }
+                                        );
+                                        setAdditionalFieldTouched('icon', true);
+                                      }
+                                    }}
+                                  />
+                                  <FormControl
+                                    name="icon"
+                                    label="Ícone"
+                                    w="auto"
+                                    error={additionalErrors.icon}
+                                    touched={additionalTouched.icon}
+                                    isRequired
+                                  >
+                                    <IconButton
+                                      aria-label="service icon"
+                                      {...(additionalValues.icon
+                                        ? {
+                                            bgImage: additionalValues.icon,
+                                            bgSize: 'cover',
+                                            bgPos: 'center',
+                                            _hover: {
+                                              bg: '',
+                                            },
+                                          }
+                                        : {
+                                            icon: <MdAdd size={20} />,
+                                            colorScheme: additionalErrors.icon
+                                              ? 'red'
+                                              : 'gray',
+                                          })}
+                                      onClick={() => {
+                                        inputFileRef.current?.click();
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormControl
+                                    name="name"
+                                    label="Título"
+                                    error={additionalErrors.name}
+                                    touched={additionalTouched.name}
+                                    onChange={handleChangeAdditionalForm}
+                                    value={additionalValues.name}
+                                    isRequired
+                                  />
+                                </Flex>
+                              );
+                            }}
+                          </Formik>
+                        </ModalBody>
+                        <ModalFooter>
+                          <Button
+                            colorScheme="blue"
+                            mr={3}
+                            onClick={() => {
+                              additionalFormRef.current?.resetForm();
+                              closeModalNewAdditional();
+                            }}
+                            size="sm"
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={additionalFormRef.current?.submitForm}
+                            variant="ghost"
+                            isLoading={newItemLoading}
+                            loadingText="Cadastrando..."
+                          >
+                            Cadastrar
+                          </Button>
+                        </ModalFooter>
+                      </ModalContent>
+                    </Modal>
+                  </FormControl>
+                  <VStack gap="10px">
+                    <Text alignSelf="self-start" as="b">
+                      Custo de instalação
+                    </Text>
+                    <Flex gap="10px">
+                      <FormControl
                         name="installationNormal"
-                        prefix={<span />}
-                      />
-                    </Container.Item>
-                  </Col>
-                  <Col style={{ width: '50%' }}>
-                    <Container.Item
-                      name="installationFidelity"
-                      label="Preço com fidelidade"
-                    >
-                      <InputMask
-                        setFieldValue={setFieldValue}
-                        placeholder="0,00"
-                        mask="currency"
+                        label="Preço sem fidelidade"
+                        error={errors.installationNormal}
+                        touched={touched.installationNormal}
+                        isRequired
+                      >
+                        <InputMask
+                          onChange={handleChange}
+                          placeholder="0.00"
+                          mask="currency"
+                          name="installationNormal"
+                          value={values.installationNormal}
+                        />
+                      </FormControl>
+                      <FormControl
                         name="installationFidelity"
-                        prefix={<span />}
-                      />
-                    </Container.Item>
-                  </Col>
-                </Row>
-              </StyledTextField>
-              <Checkbox name="active">Marcar plano como ativo</Checkbox>
-            </Container>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: isEditing ? 'space-between' : 'flex-end',
-                marginTop: 20,
-              }}
+                        label="Preço com fidelidade"
+                        error={errors.installationFidelity}
+                        touched={touched.installationFidelity}
+                      >
+                        <InputMask
+                          onChange={handleChange}
+                          placeholder="0.00"
+                          mask="currency"
+                          name="installationFidelity"
+                          value={values.installationFidelity}
+                        />
+                      </FormControl>
+                    </Flex>
+                  </VStack>
+                  <Checkbox
+                    size="md"
+                    colorScheme="orange"
+                    defaultChecked={values.active}
+                    name="active"
+                    onChange={({ target }) => {
+                      setFieldValue('active', target.checked);
+                      setFieldTouched('active', true);
+                    }}
+                  >
+                    Marcar plano como ativo
+                  </Checkbox>
+                </>
+              );
+            }}
+          </Formik>
+        </ModalBody>
+        <ModalFooter justifyContent="space-between">
+          {isEditing && (
+            <Button
+              leftIcon={<MdDeleteOutline size={15} />}
+              size="sm"
+              colorScheme="red"
+              onClick={handleDelete}
+              isLoading={loadingDelete}
+              loadingText="Removendo..."
             >
-              {isEditing && (
-                <Button
-                  type="primary"
-                  icon={<MdDeleteOutline size={15} />}
-                  size="middle"
-                  style={{
-                    background: '#aa3838',
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  onClick={handleDelete}
-                  loading={loadingDelete}
-                >
-                  Remover
-                </Button>
-              )}
-              <Space>
-                {/* <Button
-                  key="cancel"
-                  danger
-                  onClick={handleCancel}
-                >
-                  Cancelar
-                </Button> */}
-                <Button
-                  key="submit"
-                  loading={loading}
-                  onClick={submitForm}
-                  disabled={
-                    isEditing && isEqual(normalizedProductToEdit, values)
-                  }
-                >
-                  {isEditing ? 'Salvar' : 'Cadastrar'}
-                </Button>
-              </Space>
-            </div>
-          </Modal>
-        );
-      }}
-    </Formik>
+              Remover
+            </Button>
+          )}
+          <Flex gap="5px">
+            <Button colorScheme="gray" onClick={handleCancel} size="sm">
+              Cancelar
+            </Button>
+            <Button
+              isLoading={isEditing ? loadingUpdate : loadingCreate}
+              loadingText={isEditing ? 'Salvando...' : 'Cadastrando...'}
+              onClick={formRef.current?.submitForm}
+              colorScheme="green"
+              size="sm"
+              disabled={isEditing && !productChanged}
+            >
+              {isEditing ? 'Salvar' : 'Cadastrar'}
+            </Button>
+          </Flex>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 };
 

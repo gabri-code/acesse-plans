@@ -44,7 +44,7 @@ interface PreRegister {
 
 interface ProductResponse {
   data?: Product;
-  error?: Error;
+  error?: ErrorResponse;
 }
 
 export type RolesPT = {

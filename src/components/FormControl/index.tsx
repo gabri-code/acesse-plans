@@ -11,7 +11,7 @@ import PasswordInput from '../InputPassword';
 
 export type FormControlProps = Omit<ChakraFormControlProps, 'label'> & {
   name: string;
-  type: HTMLInputTypeAttribute;
+  type?: HTMLInputTypeAttribute;
   label: any;
   testid?: string;
   touched?: boolean;

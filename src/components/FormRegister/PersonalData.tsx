@@ -23,7 +23,6 @@ import {
 import validateCPF from '../../utils/validateCPF';
 import { GET_LOCATION_QUERY } from '../../graphql/queries/getLocation';
 import { UserRegisterContext } from '../../contexts/UserRegisterContext';
-import { UserRegister } from '../../types';
 import { InputMask } from '../InputMask';
 import { SIGNUP_MUTATION } from '../../graphql/mutations/user/signup';
 
@@ -186,7 +185,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
   const handleSubmit = async () => {
     const personalData = ref.current?.values;
 
-    const userData: UserRegister = {
+    const userData = {
       fullName: dataRegister?.fullName ?? '',
       address: `${personalData?.street}, ${personalData?.houseNumber}${
         personalData?.complement ? `, ${personalData.complement} -` : ' -'
@@ -253,12 +252,11 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                 <Col style={{ width: 'calc(100% / 3)' }}>
                   <WrapInput name="phone" label="Telefone" required>
                     <InputMask
-                      prefix={<PhoneFilled />}
+                      // prefix={<PhoneFilled />}
                       type="tel"
                       name="phone"
                       placeholder="(32) 9 1234-5678"
                       mask="phone"
-                      setFieldValue={setFieldValue}
                     />
                   </WrapInput>
                 </Col>
@@ -268,8 +266,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                       mask="cpf"
                       placeholder="123.456.789-10"
                       name="cpf"
-                      prefix={<NumberOutlined />}
-                      setFieldValue={setFieldValue}
+                      // prefix={<NumberOutlined />}
                     />
                   </WrapInput>
                 </Col>
@@ -283,8 +280,7 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                       mask="birth"
                       placeholder="10/01/1990"
                       name="birthDay"
-                      prefix={<CalendarFilled />}
-                      setFieldValue={setFieldValue}
+                      // prefix={<CalendarFilled />}
                     />
                   </WrapInput>
                 </Col>
@@ -334,9 +330,8 @@ const FormPersonalData: FC<IFormValidation> = ({ ...props }) => {
                       name="cep"
                       mask="cep"
                       placeholder="36830-000"
-                      suffix={<span />}
+                      // suffix={<span />}
                       onChange={getCityByCEP}
-                      setFieldValue={setFieldValue}
                     />
                   </WrapInput>
                 </Col>
