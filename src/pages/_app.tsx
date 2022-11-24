@@ -9,6 +9,9 @@ import { useApollo } from '../graphql/client';
 import GlobalStyle from '../styles/GlobalStyle';
 import emotionCache from '../lib/emotion-cache';
 
+import 'swiper/css';
+import 'swiper/css/navigation';
+
 function MyApp({ Component, pageProps }: AppProps) {
   // const protectedRoutes = [
   //   '/',

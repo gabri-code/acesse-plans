@@ -24,10 +24,14 @@ import {
   MdContactPage,
   MdDashboard,
   MdDashboardCustomize,
+  MdMessage,
   MdOutlineAdminPanelSettings,
   MdOutlineContactPage,
   MdOutlineDashboard,
   MdOutlineDashboardCustomize,
+  MdOutlineMessage,
+  MdOutlineStore,
+  MdStore,
 } from 'react-icons/md';
 import NavItem from '../NavItem';
 
@@ -77,6 +81,13 @@ export default function Sidebar() {
           active={router.pathname === '/'}
         />
         <NavItem
+          href="/mercadao"
+          title="Mercadão"
+          icon={router.pathname === '/mercadao' ? MdStore : MdOutlineStore}
+          collapsed={collapsed}
+          active={router.pathname === '/mercadao'}
+        />
+        <NavItem
           href="/gerenciamento-usuarios"
           title="Gerenciar usuários"
           icon={
@@ -91,7 +102,7 @@ export default function Sidebar() {
           href="/gerenciamento-clientes"
           title="Gerenciar clientes"
           icon={
-            router.pathname === '/gerenciamento-usuarios'
+            router.pathname === '/gerenciamento-clientes'
               ? MdContactPage
               : MdOutlineContactPage
           }
@@ -102,12 +113,19 @@ export default function Sidebar() {
           href="/gerenciamento-produtos"
           title="Gerenciar produtos"
           icon={
-            router.pathname === '/gerenciamento-usuarios'
+            router.pathname === '/gerenciamento-produtos'
               ? MdDashboardCustomize
               : MdOutlineDashboardCustomize
           }
           collapsed={collapsed}
           active={router.pathname === '/gerenciamento-produtos'}
+        />
+        <NavItem
+          href="/mensagens"
+          title="Mensagens"
+          icon={router.pathname === '/mensagens' ? MdMessage : MdOutlineMessage}
+          collapsed={collapsed}
+          active={router.pathname === '/mensagens'}
         />
       </Flex>
     </Flex>

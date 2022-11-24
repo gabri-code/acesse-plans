@@ -70,7 +70,7 @@ const DefaultLayout: FC<{ children: ReactNode; title: string }> = ({
           <Sidebar />
         </GridItem>
         <GridItem area={'main'} pl="60px">
-          {router.pathname !== '/' && (
+          {!['/', '/mensagens'].includes(router.pathname) && (
             <Flex
               h="40px"
               bg="#fff"

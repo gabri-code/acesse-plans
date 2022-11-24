@@ -21,6 +21,11 @@ interface SignUp {
   error?: ErrorResponse;
 }
 
+interface SignIn {
+  email: string;
+  password: string;
+}
+
 interface City {
   Uf: string;
   Municipio: string;

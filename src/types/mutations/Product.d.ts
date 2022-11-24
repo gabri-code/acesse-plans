@@ -1,4 +1,4 @@
-import { ProductResponse } from '..';
+import { ProductResponse, Product } from '..';
 
 export interface CreateProductData {
   createProduct: ProductResponse;

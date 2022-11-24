@@ -49,6 +49,7 @@
     "react-parallax-tilt": "^1.7.69",
     "sass": "^1.55.0",
     "styled-components": "^5.3.5",
+    "swiper": "^8.4.5",
     "ws": "^8.10.0",
     "yup": "^0.32.11"
   },

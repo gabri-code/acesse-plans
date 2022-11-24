@@ -9,8 +9,8 @@ const colors = {
 };
 
 const fonts = {
-  heading: `Gilroy-SemiBold', sans-serif`,
-  body: `'Gilroy-Regular', sans-serif`,
+  heading: "'Gilroy-SemiBold', sans-serif",
+  body: "'Gilroy-Regular', sans-serif",
   'Gilroy-Regular': 'Gilroy-Regular',
   'Gilroy-Bold': 'Gilroy-Bold',
   'Gilroy-SemiBold': 'Gilroy-SemiBold',

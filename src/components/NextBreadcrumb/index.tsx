@@ -9,6 +9,7 @@ export default function NextBreadcrumbs() {
 
   const textByPath: { [key: string]: string } = {
     '/': 'Painel de Controle',
+    '/mercadao': 'Mercadão',
     '/gerenciamento-usuarios': 'Gerenciamento de Usuários',
     '/gerenciamento-clientes': 'Gerenciamento de Clientes',
     '/gerenciamento-produtos': 'Gerenciamento de Produtos',
