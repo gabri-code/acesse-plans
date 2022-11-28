@@ -13,9 +13,18 @@ import NextBreadcrumbs from '../../components/NextBreadcrumb';
 
 // type MenuItem = Required<MenuProps>['items'][number];
 
-const DefaultLayout: FC<{ children: ReactNode; title: string }> = ({
+interface DFProps {
+  children: ReactNode;
+  title: string;
+  isAuthenticated: boolean;
+  token: string;
+}
+
+const DefaultLayout: FC<DFProps> = ({
   title,
   children,
+  isAuthenticated,
+  token,
 }) => {
   const router = useRouter();
 
@@ -64,13 +73,13 @@ const DefaultLayout: FC<{ children: ReactNode; title: string }> = ({
         minH="100vh"
       >
         <GridItem area={'header'}>
-          <Header />
+          <Header isAuthenticated={isAuthenticated} />
         </GridItem>
         <GridItem area={'nav'}>
-          <Sidebar />
+          <Sidebar token={token} />
         </GridItem>
         <GridItem area={'main'} pl="60px">
-          {!['/', '/mensagens'].includes(router.pathname) && (
+          {!['/painel', '/mensagens'].includes(router.pathname) && (
             <Flex
               h="40px"
               bg="#fff"

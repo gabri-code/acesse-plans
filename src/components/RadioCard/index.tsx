@@ -27,7 +27,7 @@ export const RadioCard = ({ extraStyle, type, ...props }: Props) => {
       : inputCheckbox.getCheckboxProps();
 
   return (
-    <Box as="label">
+    <Box as="label" w="100%">
       <input {...input} />
       <Box
         {...checkbox}
@@ -46,7 +46,10 @@ export const RadioCard = ({ extraStyle, type, ...props }: Props) => {
           boxShadow: 'outline',
         }}
         p="5px 15px"
-        {...extraStyle}
+        borderRadius="full"
+        fontFamily="Gilroy-Medium"
+        fontSize="14px"
+        whiteSpace="nowrap"
       >
         {props.children}
       </Box>

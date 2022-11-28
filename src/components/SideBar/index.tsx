@@ -1,23 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Flex,
-  Text,
-  IconButton,
-  Divider,
-  Avatar,
-  Heading,
-  useDisclosure,
-} from '@chakra-ui/react';
-import {
-  FiMenu,
-  FiHome,
-  FiCalendar,
-  FiUser,
-  FiDollarSign,
-  FiBriefcase,
-  FiSettings,
-} from 'react-icons/fi';
-import { IoPawOutline } from 'react-icons/io5';
+import { Flex, useDisclosure } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import {
   MdAdminPanelSettings,
@@ -34,8 +16,13 @@ import {
   MdStore,
 } from 'react-icons/md';
 import NavItem from '../NavItem';
+import { PrivateComponent } from '../PrivateComponent';
 
-export default function Sidebar() {
+interface SBProps {
+  token: string;
+}
+
+export default function Sidebar({ token }: SBProps) {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: false });
 
   const router = useRouter();
@@ -75,58 +62,75 @@ export default function Sidebar() {
       >
         <NavItem
           href="/"
-          title="Painel de Controle"
-          icon={router.pathname === '/' ? MdDashboard : MdOutlineDashboard}
+          title="Mercadão"
+          icon={router.pathname === '/' ? MdStore : MdOutlineStore}
           collapsed={collapsed}
           active={router.pathname === '/'}
         />
-        <NavItem
-          href="/mercadao"
-          title="Mercadão"
-          icon={router.pathname === '/mercadao' ? MdStore : MdOutlineStore}
-          collapsed={collapsed}
-          active={router.pathname === '/mercadao'}
-        />
-        <NavItem
-          href="/gerenciamento-usuarios"
-          title="Gerenciar usuários"
-          icon={
-            router.pathname === '/gerenciamento-usuarios'
-              ? MdAdminPanelSettings
-              : MdOutlineAdminPanelSettings
-          }
-          collapsed={collapsed}
-          active={router.pathname === '/gerenciamento-usuarios'}
-        />
-        <NavItem
-          href="/gerenciamento-clientes"
-          title="Gerenciar clientes"
-          icon={
-            router.pathname === '/gerenciamento-clientes'
-              ? MdContactPage
-              : MdOutlineContactPage
-          }
-          collapsed={collapsed}
-          active={router.pathname === '/gerenciamento-clientes'}
-        />
-        <NavItem
-          href="/gerenciamento-produtos"
-          title="Gerenciar produtos"
-          icon={
-            router.pathname === '/gerenciamento-produtos'
-              ? MdDashboardCustomize
-              : MdOutlineDashboardCustomize
-          }
-          collapsed={collapsed}
-          active={router.pathname === '/gerenciamento-produtos'}
-        />
-        <NavItem
-          href="/mensagens"
-          title="Mensagens"
-          icon={router.pathname === '/mensagens' ? MdMessage : MdOutlineMessage}
-          collapsed={collapsed}
-          active={router.pathname === '/mensagens'}
-        />
+        <PrivateComponent token={token} roles={['admin', 'indicator']}>
+          <NavItem
+            href="/painel"
+            title="Painel de Controle"
+            icon={
+              router.pathname === '/painel' ? MdDashboard : MdOutlineDashboard
+            }
+            collapsed={collapsed}
+            active={router.pathname === '/painel'}
+          />
+        </PrivateComponent>
+        <PrivateComponent token={token} roles={['admin']}>
+          <NavItem
+            href="/gerenciamento-usuarios"
+            title="Gerenciar usuários"
+            icon={
+              router.pathname === '/gerenciamento-usuarios'
+                ? MdAdminPanelSettings
+                : MdOutlineAdminPanelSettings
+            }
+            collapsed={collapsed}
+            active={router.pathname === '/gerenciamento-usuarios'}
+          />
+        </PrivateComponent>
+        <PrivateComponent token={token} roles={['admin']}>
+          <NavItem
+            href="/gerenciamento-clientes"
+            title="Gerenciar clientes"
+            icon={
+              router.pathname === '/gerenciamento-clientes'
+                ? MdContactPage
+                : MdOutlineContactPage
+            }
+            collapsed={collapsed}
+            active={router.pathname === '/gerenciamento-clientes'}
+          />
+        </PrivateComponent>
+        <PrivateComponent token={token} roles={['admin']}>
+          <NavItem
+            href="/gerenciamento-produtos"
+            title="Gerenciar produtos"
+            icon={
+              router.pathname === '/gerenciamento-produtos'
+                ? MdDashboardCustomize
+                : MdOutlineDashboardCustomize
+            }
+            collapsed={collapsed}
+            active={router.pathname === '/gerenciamento-produtos'}
+          />
+        </PrivateComponent>
+        <PrivateComponent
+          token={token}
+          roles={['admin', 'customer', 'indicator']}
+        >
+          <NavItem
+            href="/mensagens"
+            title="Mensagens"
+            icon={
+              router.pathname === '/mensagens' ? MdMessage : MdOutlineMessage
+            }
+            collapsed={collapsed}
+            active={router.pathname === '/mensagens'}
+          />
+        </PrivateComponent>
       </Flex>
     </Flex>
   );

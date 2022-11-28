@@ -8,8 +8,8 @@ export default function NextBreadcrumbs() {
   const router = useRouter();
 
   const textByPath: { [key: string]: string } = {
-    '/': 'Painel de Controle',
-    '/mercadao': 'Mercadão',
+    '/': 'Mercadão',
+    '/painel': 'Painel de Controle',
     '/gerenciamento-usuarios': 'Gerenciamento de Usuários',
     '/gerenciamento-clientes': 'Gerenciamento de Clientes',
     '/gerenciamento-produtos': 'Gerenciamento de Produtos',

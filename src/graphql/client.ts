@@ -44,7 +44,9 @@ const createApolloClient = (ctx?: GetServerSidePropsContext) => {
       : httpLink;
 
   const authLink = setContext((_, { headers }) => {
-    const { 'acesse-token': token } = ctx ? parseCookies(ctx) : parseCookies();
+    const { 'auth.token': token } = ctx ? parseCookies(ctx) : parseCookies();
+
+    console.log(token);
 
     return {
       headers: {

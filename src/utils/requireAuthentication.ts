@@ -7,12 +7,12 @@ export const requireAuthentication = async (
   ctx: GetServerSidePropsContext,
   callback: any
 ) => {
-  const { 'acesse-token': token } = parseCookies(ctx);
+  const { 'auth.token': token } = parseCookies(ctx);
 
   if (!token) {
     return {
       redirect: {
-        destination: '/signin',
+        destination: '/admin-signin',
         permanent: false,
       },
     };

@@ -14,10 +14,7 @@ export interface User {
   picture: string;
   createdAt: Date;
   updatedAt: Date;
-  role: 'admin' | 'indicator';
-  customers?: Customer[];
-  commissions?: Commissions[];
-  _count?: UserCount | null;
+  role: 'admin' | 'indicator' | 'customer';
 }
 
 export interface UserCount {

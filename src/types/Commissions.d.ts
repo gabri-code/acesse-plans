@@ -1,10 +1,11 @@
 import { Customer } from './Customer';
-import { User } from './User';
+import { Indicator } from './Indicator';
 
 export interface Commissions {
-  user?: User;
-  customer?: Customer;
   createdAt: Date;
-  userId: string;
   customerId: string;
+  indicatorId: string;
+  customer?: Customer;
+  indicator?: Indicator;
+  commission: number;
 }

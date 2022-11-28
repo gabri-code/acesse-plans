@@ -2,20 +2,35 @@ import { AdditionalItem } from './AdditionalItem';
 import { CommissionMode } from './CommissionMode';
 import { Commissions } from './Commissions';
 import { Customer } from './Customer';
+import { Indicator } from './Indicator';
+import { PreCustomer } from './PreCustomer';
+import { PreIndicator } from './PreIndicator';
 import { PreUser } from './PreUser';
 import { Product } from './Product';
 import { User } from './User';
 
-interface ErrorResponse {
+export interface ErrorResponse {
   field?: string;
   message: string;
 }
 
-interface Auth {
+interface CustomerAuth {
   token: string;
-  user: User;
+  user: Customer | PreCustomer;
+  error: ErrorResponse;
 }
 
+interface IndicatorAuth {
+  token: string;
+  user: Indicator | PreIndicator;
+  error: ErrorResponse;
+}
+
+interface AdminAuth {
+  token: string;
+  user: User;
+  error: ErrorResponse;
+}
 interface SignUp {
   user?: User;
   error?: ErrorResponse;
@@ -53,8 +68,9 @@ interface ProductResponse {
 }
 
 export type RolesPT = {
-  admin: string;
-  indicator: string;
+  admin?: string;
+  indicator?: string;
+  customer?: string;
 };
 
 export type Role = 'admin' | 'indicator';
@@ -73,10 +89,12 @@ export {
   PreUser,
   Product,
   User,
-  Auth,
+  CustomerAuth,
   SignUp,
   PreUserStart,
   CEPResponse,
   ProductResponse,
   PreRegister,
+  IndicatorAuth,
+  AdminAuth,
 };

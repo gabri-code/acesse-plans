@@ -1,236 +1,242 @@
-import type {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  NextPage,
-} from 'next';
-import 'moment/locale/pt-br';
-import locale from 'antd/lib/locale/pt_BR';
-import DatePicker, { RangePickerProps } from 'antd/lib/date-picker';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
+import { SwiperSlide } from 'swiper/react';
 import {
-  ConfigProvider,
-  Dropdown,
-  MenuProps,
-  notification,
-  Space,
-  Typography,
-} from 'antd';
-import moment from 'moment';
-import {
-  DownOutlined,
-  HistoryOutlined,
-  SolutionOutlined,
-  UsergroupAddOutlined,
-} from '@ant-design/icons';
-import {
-  ApolloClient,
-  NormalizedCacheObject,
-  useSubscription,
-} from '@apollo/client';
+  Button,
+  ButtonGroup,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Divider,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Input,
+  InputGroup,
+  InputLeftAddon,
+  Select,
+  Text,
+  Tooltip,
+  VStack,
+} from '@chakra-ui/react';
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import { FC } from 'react';
+import { parseCookies } from 'nookies';
+import CustomSwiper from '../components/CustomSwiper';
+import { GET_PRODUCTS_QUERY } from '../graphql/queries/getProducts';
+import DefaultLayout from '../layouts/Default';
+import { Product, User } from '../types';
+import { GetProductsData } from '../types/queries/Product';
 import { requireAuthentication } from '../utils/requireAuthentication';
-import { UserResponse } from '../types';
-import DefaultLayoult from '../layouts/Default';
-import {
-  StyledContentTitle,
-  StyledFilterItem,
-  StyledMenuFilter,
-  StyledMeta,
-  StyledOverviewCard,
-  StyledOverviewContainer,
-} from '../styles/Home';
-import { AuthContext } from '../contexts/AuthContext';
-import { NEW_REGISTER_SUBSCRIPTION } from '../graphql/subscriptions/registerNotification';
+import { initializeApollo } from '../graphql/client';
 
-const { Text } = Typography;
-
-export interface IPageProps {
+interface PageProps {
   title: string;
-  user: UserResponse;
+  products: Product[];
+  isAuthenticated: boolean;
+  token: string;
 }
 
-const Home: NextPage<IPageProps> = ({ title, user }) => {
-  const { setUser } = useContext(AuthContext);
-  const [period, setPeriod] = useState({
-    value: 'all',
-    name: 'Todo o período',
-  });
-  const [customPeriod, setCustomPeriod] = useState({
-    start: '',
-    end: '',
-  });
-  const [open, setOpen] = useState(false);
+const formatPrice = (value: number) => value.toFixed(2);
 
-  useEffect(() => {
-    console.log(user);
-    if (user) {
-      setUser(user);
-    }
-  }, [setUser, user]);
-
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
-    if (customPeriod.start) {
-      setCustomPeriod({
-        start: '',
-        end: '',
-      });
-    }
-
-    setPeriod({ value: e.key, name: e.domEvent.currentTarget.innerText });
-    if (e.key !== 'custom_period') {
-      setOpen(false);
-    }
-  };
-
-  const handleOpenChange = (flag: boolean) => {
-    setOpen(flag);
-  };
-
-  const onChange: RangePickerProps['onChange'] = (dates, dateStrings) => {
-    if (dates) {
-      setCustomPeriod({
-        start: dateStrings[0],
-        end: dateStrings[1],
-      });
-    } else {
-      console.log('Clear');
-    }
-  };
-
-  const filterMenu = (
-    <StyledMenuFilter
-      style={{ maxWidth: 270, width: '100%' }}
-      onClick={handleMenuClick}
-      selectable
-    >
-      <StyledFilterItem key="all" title="Todo o período">
-        Todo o período
-      </StyledFilterItem>
-      <StyledFilterItem key="current" title="Hoje">
-        Hoje
-      </StyledFilterItem>
-      <StyledFilterItem key="yesterday" title="Ontem">
-        Ontem
-      </StyledFilterItem>
-      <StyledFilterItem key="seven_days_last" title="Últimos 7 dias">
-        Últimos 7 dias
-      </StyledFilterItem>
-      <StyledFilterItem key="fifteen_days_last" title="Últimos 15 dias">
-        Últimos 15 dias
-      </StyledFilterItem>
-      <StyledFilterItem key="current_month" title="Este mês">
-        Este mês
-      </StyledFilterItem>
-      <StyledFilterItem key="custom_period" title="Período Personalizado">
-        Período Personalizado
-        {period.value === 'custom_period' && (
-          // <StyledFilterItem style={{ width: 'fit-content' }} key="date_picker">
-          <Space direction="vertical" size={12} style={{ width: '100%' }}>
-            <ConfigProvider locale={locale}>
-              <DatePicker.RangePicker
-                format="DD-MM-YYYY"
-                style={{ width: '100%' }}
-                ranges={{
-                  Hoje: [moment(), moment()],
-                  'Este mês': [
-                    moment().startOf('month'),
-                    moment().endOf('month'),
-                  ],
-                }}
-                onChange={onChange}
-              />
-            </ConfigProvider>
-          </Space>
-          // </StyledFilterItem>
-        )}
-      </StyledFilterItem>
-    </StyledMenuFilter>
-  );
+const MercadaoPage: FC<PageProps> = ({
+  title,
+  products,
+  isAuthenticated,
+  token,
+}) => {
+  console.log(products);
 
   return (
-    <DefaultLayoult title={title}>
-      <StyledOverviewContainer>
-        <div className="title-container">
-          <StyledContentTitle level={2}>OVERVIEW</StyledContentTitle>
-          <Dropdown
-            overlay={filterMenu}
-            trigger={['click']}
-            open={open}
-            onOpenChange={handleOpenChange}
-          >
-            <a
-              onClick={(e) => e.preventDefault()}
-              style={{
-                width: 270,
-                display: 'flex',
-                justifyContent: 'right',
-                alignItems: 'center',
+    <DefaultLayout
+      token={token}
+      title={title}
+      isAuthenticated={isAuthenticated}
+    >
+      <Flex direction="column" w="100%">
+        <Heading
+          as="h2"
+          size="xl"
+          fontFamily="Gilroy-Light"
+          color="#232425"
+          mb="30px"
+        >
+          Mercadão Acesse
+        </Heading>
+        <InputGroup w="800px" size="lg" mb={10}>
+          <InputLeftAddon p="0">
+            <Select
+              defaultValue="all"
+              borderRightRadius={0}
+              borderRight="none"
+              size="lg"
+              minW="100%"
+              _focus={{
+                outlineWidth: '0.01px',
+                border: 'none',
               }}
             >
-              <Space
-                direction="vertical"
-                style={{
-                  margin: 0,
-                  rowGap: 0,
-                }}
-              >
-                <Space>
-                  {period.name}
-                  <DownOutlined />
-                </Space>
-                <Text className="period-value">
-                  {period.value === 'custom_period' &&
-                    customPeriod.start &&
-                    `${customPeriod.start} - ${customPeriod.end}`}
-                </Text>
-              </Space>
-            </a>
-          </Dropdown>
-        </div>
-        <div className="cards-container">
-          <StyledOverviewCard>
-            <StyledMeta
-              avatar={<UsergroupAddOutlined style={{ fontSize: 16 }} />}
-              title="Indicações"
-              description="15"
-            />
-          </StyledOverviewCard>
-          <StyledOverviewCard>
-            <StyledMeta
-              avatar={<SolutionOutlined style={{ fontSize: 16 }} />}
-              title="Convertidos"
-              description="5"
-            />
-          </StyledOverviewCard>
-          <StyledOverviewCard>
-            <StyledMeta
-              avatar={<HistoryOutlined style={{ fontSize: 16 }} />}
-              title="Aguardando"
-              description="5"
-            />
-          </StyledOverviewCard>
-        </div>
-      </StyledOverviewContainer>
-    </DefaultLayoult>
+              <option value="all">Todos os produtos</option>
+              <option value="internet">Planos de internet</option>
+              <option value="tv">Planos de TV</option>
+            </Select>
+          </InputLeftAddon>
+          <Input
+            bg="#fff"
+            borderLeftRadius={0}
+            borderLeft="none"
+            // size="lg"
+            // w="500px"
+            _focus={{
+              outlineWidth: '0.01px',
+              border: 'none',
+            }}
+          />
+        </InputGroup>
+        <VStack
+          align="flex-start"
+          maxW="100%"
+          sx={{
+            '--swiper-navigation-size': '20px',
+          }}
+        >
+          <Text fontFamily="Gilroy-Medium" fontSize={16}>
+            Planos de Internet
+          </Text>
+          <CustomSwiper>
+            {products &&
+              products.map((product) => (
+                <SwiperSlide key={product.id}>
+                  <Card
+                    variant="unstyled"
+                    p="10px"
+                    maxW="250px"
+                    bg="#fff"
+                    _hover={{
+                      boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.15)',
+                    }}
+                  >
+                    <CardHeader>
+                      <Heading
+                        size="sm"
+                        fontFamily="Gilroy-Medium"
+                        textAlign="center"
+                        mb="10px"
+                      >
+                        {product.title.toUpperCase()}
+                      </Heading>
+                    </CardHeader>
+                    <CardBody paddingY={0}>
+                      <VStack>
+                        <Text as="b">Serviços inclusos</Text>
+                        <HStack justify="center" w="100%">
+                          {product.additionalItems?.map((item) => (
+                            <Tooltip key={item.id} label={item.name}>
+                              <Image src={item.icon} alt={item.name} w="25px" />
+                            </Tooltip>
+                          ))}
+                        </HStack>
+                      </VStack>
+                      <HStack justify="center" my="15px">
+                        {!product.promotionalPrice ? (
+                          <Text>R$ {formatPrice(product.price)}</Text>
+                        ) : (
+                          <>
+                            <Text as="del">{formatPrice(product.price)}</Text>
+                            {product.promotionalPrice && (
+                              <Text as="b" color="red.600">
+                                R${' '}
+                                {
+                                  formatPrice(product.promotionalPrice).split(
+                                    '.'
+                                  )[0]
+                                }{' '}
+                                <Text as="sup">
+                                  {
+                                    formatPrice(product.promotionalPrice).split(
+                                      '.'
+                                    )[1]
+                                  }
+                                </Text>
+                              </Text>
+                            )}
+                          </>
+                        )}
+                      </HStack>
+                    </CardBody>
+                    <Divider my={2} />
+                    <CardFooter>
+                      <VStack w="100%">
+                        <ButtonGroup gap="4" justifyContent="center" w="100%">
+                          <Button size="sm" colorScheme="orange" flex="1">
+                            Ver mais
+                          </Button>
+                          <Button size="sm" variant="link" flex="1">
+                            Adquirir
+                          </Button>
+                        </ButtonGroup>
+                        <Button
+                          size="sm"
+                          w="100%"
+                          variant="outline"
+                          colorScheme="green"
+                        >
+                          Me afiliar
+                        </Button>
+                      </VStack>
+                    </CardFooter>
+                  </Card>
+                </SwiperSlide>
+              ))}
+          </CustomSwiper>
+        </VStack>
+      </Flex>
+    </DefaultLayout>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  return await requireAuthentication(
-    context,
-    async (
-      _client: ApolloClient<NormalizedCacheObject>,
-      user: UserResponse
-    ) => {
-      return {
-        props: {
-          user,
-          title: 'Painel de Controle',
-        },
-      };
-    }
-  );
+  // return requireAuthentication(
+  //   context,
+  //   async (client: ApolloClient<NormalizedCacheObject>, user: User) => {
+  const apolloClient = initializeApollo({}, context);
+
+  const { 'auth.token': token } = parseCookies(context);
+
+  const isAuthenticated = !!token;
+
+  const defaultProps = {
+    title: 'Mercadão',
+    isAuthenticated,
+    products: [],
+    token: token ?? '',
+    // user,
+  };
+
+  try {
+    const {
+      data: { getProducts },
+    } = await apolloClient.query<GetProductsData>({
+      query: GET_PRODUCTS_QUERY,
+    });
+
+    return {
+      props: {
+        ...defaultProps,
+        products: getProducts,
+      },
+    };
+  } catch (e) {
+    console.log(e);
+    return {
+      props: defaultProps,
+    };
+  }
+  // }
+  // );
 };
 
-export default Home;
+export default MercadaoPage;

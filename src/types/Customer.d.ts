@@ -1,5 +1,6 @@
 import { Commissions } from './Commissions';
-import { User } from './User';
+import { Indicator } from './Indicator';
+import { Purchases } from './Purchases';
 
 export interface Customer {
   id: string;
@@ -10,13 +11,17 @@ export interface Customer {
   cpf_cnpj: string;
   createdAt: Date;
   updatedAt: Date;
-  indicator?: User | null;
-  indicatorId: string;
   status: 'pending' | 'canceled' | 'approved';
+  indicatorId: string;
+  password?: string;
+  role: 'admin' | 'indicator' | 'customer';
+  indicator?: Indicator;
   commissions?: Commissions[];
+  purchases?: Purchases[];
   _count?: CustomerCount | null;
 }
 
 export interface CustomerCount {
   commissions: number;
+  purchases: number;
 }

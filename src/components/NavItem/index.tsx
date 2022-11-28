@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { IconType } from 'react-icons/lib';
 import { CustomNextLink } from '../NextLink';
+import { parseCookies } from 'nookies';
 
 interface NavItemProps {
   icon?: IconType;
@@ -29,6 +30,9 @@ export default function NavItem({
   href,
   active,
 }: NavItemProps) {
+
+  
+  
   return (
     <Flex
       mt={30}
